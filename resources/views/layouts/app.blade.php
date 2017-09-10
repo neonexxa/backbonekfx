@@ -38,6 +38,7 @@
                     <!-- Left Side Of Navbar -->
                     <ul class="nav navbar-nav">
                         <li><a href="{{ route('training.index') }}">Courses</a></li>
+                        <li><a href="{{ route('setting.index') }}">Settting</a></li>
                         
                         &nbsp;
                     </ul>
