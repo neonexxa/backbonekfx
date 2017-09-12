@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 8);
+/******/ 	return __webpack_require__(__webpack_require__.s = 12);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -70,8 +70,8 @@
 "use strict";
 
 
-var bind = __webpack_require__(3);
-var isBuffer = __webpack_require__(17);
+var bind = __webpack_require__(7);
+var isBuffer = __webpack_require__(26);
 
 /*global toString:true*/
 
@@ -378,10 +378,459 @@ module.exports = {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
+
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+var hasClass = function hasClass(elem, className) {
+  return new RegExp(' ' + className + ' ').test(' ' + elem.className + ' ');
+};
+
+var addClass = function addClass(elem, className) {
+  if (!hasClass(elem, className)) {
+    elem.className += ' ' + className;
+  }
+};
+
+var removeClass = function removeClass(elem, className) {
+  var newClass = ' ' + elem.className.replace(/[\t\r\n]/g, ' ') + ' ';
+  if (hasClass(elem, className)) {
+    while (newClass.indexOf(' ' + className + ' ') >= 0) {
+      newClass = newClass.replace(' ' + className + ' ', ' ');
+    }
+    elem.className = newClass.replace(/^\s+|\s+$/g, '');
+  }
+};
+
+var escapeHtml = function escapeHtml(str) {
+  var div = document.createElement('div');
+  div.appendChild(document.createTextNode(str));
+  return div.innerHTML;
+};
+
+var _show = function _show(elem) {
+  elem.style.opacity = '';
+  elem.style.display = 'block';
+};
+
+var show = function show(elems) {
+  if (elems && !elems.length) {
+    return _show(elems);
+  }
+  for (var i = 0; i < elems.length; ++i) {
+    _show(elems[i]);
+  }
+};
+
+var _hide = function _hide(elem) {
+  elem.style.opacity = '';
+  elem.style.display = 'none';
+};
+
+var hide = function hide(elems) {
+  if (elems && !elems.length) {
+    return _hide(elems);
+  }
+  for (var i = 0; i < elems.length; ++i) {
+    _hide(elems[i]);
+  }
+};
+
+var isDescendant = function isDescendant(parent, child) {
+  var node = child.parentNode;
+  while (node !== null) {
+    if (node === parent) {
+      return true;
+    }
+    node = node.parentNode;
+  }
+  return false;
+};
+
+var getTopMargin = function getTopMargin(elem) {
+  elem.style.left = '-9999px';
+  elem.style.display = 'block';
+
+  var height = elem.clientHeight,
+      padding;
+  if (typeof getComputedStyle !== 'undefined') {
+    // IE 8
+    padding = parseInt(getComputedStyle(elem).getPropertyValue('padding-top'), 10);
+  } else {
+    padding = parseInt(elem.currentStyle.padding);
+  }
+
+  elem.style.left = '';
+  elem.style.display = 'none';
+  return '-' + parseInt((height + padding) / 2) + 'px';
+};
+
+var fadeIn = function fadeIn(elem, interval) {
+  if (+elem.style.opacity < 1) {
+    interval = interval || 16;
+    elem.style.opacity = 0;
+    elem.style.display = 'block';
+    var last = +new Date();
+    var tick = (function (_tick) {
+      function tick() {
+        return _tick.apply(this, arguments);
+      }
+
+      tick.toString = function () {
+        return _tick.toString();
+      };
+
+      return tick;
+    })(function () {
+      elem.style.opacity = +elem.style.opacity + (new Date() - last) / 100;
+      last = +new Date();
+
+      if (+elem.style.opacity < 1) {
+        setTimeout(tick, interval);
+      }
+    });
+    tick();
+  }
+  elem.style.display = 'block'; //fallback IE8
+};
+
+var fadeOut = function fadeOut(elem, interval) {
+  interval = interval || 16;
+  elem.style.opacity = 1;
+  var last = +new Date();
+  var tick = (function (_tick2) {
+    function tick() {
+      return _tick2.apply(this, arguments);
+    }
+
+    tick.toString = function () {
+      return _tick2.toString();
+    };
+
+    return tick;
+  })(function () {
+    elem.style.opacity = +elem.style.opacity - (new Date() - last) / 100;
+    last = +new Date();
+
+    if (+elem.style.opacity > 0) {
+      setTimeout(tick, interval);
+    } else {
+      elem.style.display = 'none';
+    }
+  });
+  tick();
+};
+
+var fireClick = function fireClick(node) {
+  // Taken from http://www.nonobtrusive.com/2011/11/29/programatically-fire-crossbrowser-click-event-with-javascript/
+  // Then fixed for today's Chrome browser.
+  if (typeof MouseEvent === 'function') {
+    // Up-to-date approach
+    var mevt = new MouseEvent('click', {
+      view: window,
+      bubbles: false,
+      cancelable: true
+    });
+    node.dispatchEvent(mevt);
+  } else if (document.createEvent) {
+    // Fallback
+    var evt = document.createEvent('MouseEvents');
+    evt.initEvent('click', false, false);
+    node.dispatchEvent(evt);
+  } else if (document.createEventObject) {
+    node.fireEvent('onclick');
+  } else if (typeof node.onclick === 'function') {
+    node.onclick();
+  }
+};
+
+var stopEventPropagation = function stopEventPropagation(e) {
+  // In particular, make sure the space bar doesn't scroll the main window.
+  if (typeof e.stopPropagation === 'function') {
+    e.stopPropagation();
+    e.preventDefault();
+  } else if (window.event && window.event.hasOwnProperty('cancelBubble')) {
+    window.event.cancelBubble = true;
+  }
+};
+
+exports.hasClass = hasClass;
+exports.addClass = addClass;
+exports.removeClass = removeClass;
+exports.escapeHtml = escapeHtml;
+exports._show = _show;
+exports.show = show;
+exports._hide = _hide;
+exports.hide = hide;
+exports.isDescendant = isDescendant;
+exports.getTopMargin = getTopMargin;
+exports.fadeIn = fadeIn;
+exports.fadeOut = fadeOut;
+exports.fireClick = fireClick;
+exports.stopEventPropagation = stopEventPropagation;
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+/*
+ * Allow user to pass their own params
+ */
+var extend = function extend(a, b) {
+  for (var key in b) {
+    if (b.hasOwnProperty(key)) {
+      a[key] = b[key];
+    }
+  }
+  return a;
+};
+
+/*
+ * Convert HEX codes to RGB values (#000000 -> rgb(0,0,0))
+ */
+var hexToRgb = function hexToRgb(hex) {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? parseInt(result[1], 16) + ', ' + parseInt(result[2], 16) + ', ' + parseInt(result[3], 16) : null;
+};
+
+/*
+ * Check if the user is using Internet Explorer 8 (for fallbacks)
+ */
+var isIE8 = function isIE8() {
+  return window.attachEvent && !window.addEventListener;
+};
+
+/*
+ * IE compatible logging for developers
+ */
+var logStr = function logStr(string) {
+  if (window.console) {
+    // IE...
+    window.console.log('SweetAlert: ' + string);
+  }
+};
+
+/*
+ * Set hover, active and focus-states for buttons 
+ * (source: http://www.sitepoint.com/javascript-generate-lighter-darker-color)
+ */
+var colorLuminance = function colorLuminance(hex, lum) {
+  // Validate hex string
+  hex = String(hex).replace(/[^0-9a-f]/gi, '');
+  if (hex.length < 6) {
+    hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+  }
+  lum = lum || 0;
+
+  // Convert to decimal and change luminosity
+  var rgb = '#';
+  var c;
+  var i;
+
+  for (i = 0; i < 3; i++) {
+    c = parseInt(hex.substr(i * 2, 2), 16);
+    c = Math.round(Math.min(Math.max(0, c + c * lum), 255)).toString(16);
+    rgb += ('00' + c).substr(c.length);
+  }
+
+  return rgb;
+};
+
+exports.extend = extend;
+exports.hexToRgb = hexToRgb;
+exports.isIE8 = isIE8;
+exports.logStr = logStr;
+exports.colorLuminance = colorLuminance;
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _hexToRgb = __webpack_require__(2);
+
+var _removeClass$getTopMargin$fadeIn$show$addClass = __webpack_require__(1);
+
+var _defaultParams = __webpack_require__(6);
+
+var _defaultParams2 = _interopRequireWildcard(_defaultParams);
+
+/*
+ * Add modal + overlay to DOM
+ */
+
+var _injectedHTML = __webpack_require__(20);
+
+var _injectedHTML2 = _interopRequireWildcard(_injectedHTML);
+
+var modalClass = '.sweet-alert';
+var overlayClass = '.sweet-overlay';
+
+var sweetAlertInitialize = function sweetAlertInitialize() {
+  var sweetWrap = document.createElement('div');
+  sweetWrap.innerHTML = _injectedHTML2['default'];
+
+  // Append elements to body
+  while (sweetWrap.firstChild) {
+    document.body.appendChild(sweetWrap.firstChild);
+  }
+};
+
+/*
+ * Get DOM element of modal
+ */
+var getModal = (function (_getModal) {
+  function getModal() {
+    return _getModal.apply(this, arguments);
+  }
+
+  getModal.toString = function () {
+    return _getModal.toString();
+  };
+
+  return getModal;
+})(function () {
+  var $modal = document.querySelector(modalClass);
+
+  if (!$modal) {
+    sweetAlertInitialize();
+    $modal = getModal();
+  }
+
+  return $modal;
+});
+
+/*
+ * Get DOM element of input (in modal)
+ */
+var getInput = function getInput() {
+  var $modal = getModal();
+  if ($modal) {
+    return $modal.querySelector('input');
+  }
+};
+
+/*
+ * Get DOM element of overlay
+ */
+var getOverlay = function getOverlay() {
+  return document.querySelector(overlayClass);
+};
+
+/*
+ * Add box-shadow style to button (depending on its chosen bg-color)
+ */
+var setFocusStyle = function setFocusStyle($button, bgColor) {
+  var rgbColor = _hexToRgb.hexToRgb(bgColor);
+  $button.style.boxShadow = '0 0 2px rgba(' + rgbColor + ', 0.8), inset 0 0 0 1px rgba(0, 0, 0, 0.05)';
+};
+
+/*
+ * Animation when opening modal
+ */
+var openModal = function openModal(callback) {
+  var $modal = getModal();
+  _removeClass$getTopMargin$fadeIn$show$addClass.fadeIn(getOverlay(), 10);
+  _removeClass$getTopMargin$fadeIn$show$addClass.show($modal);
+  _removeClass$getTopMargin$fadeIn$show$addClass.addClass($modal, 'showSweetAlert');
+  _removeClass$getTopMargin$fadeIn$show$addClass.removeClass($modal, 'hideSweetAlert');
+
+  window.previousActiveElement = document.activeElement;
+  var $okButton = $modal.querySelector('button.confirm');
+  $okButton.focus();
+
+  setTimeout(function () {
+    _removeClass$getTopMargin$fadeIn$show$addClass.addClass($modal, 'visible');
+  }, 500);
+
+  var timer = $modal.getAttribute('data-timer');
+
+  if (timer !== 'null' && timer !== '') {
+    var timerCallback = callback;
+    $modal.timeout = setTimeout(function () {
+      var doneFunctionExists = (timerCallback || null) && $modal.getAttribute('data-has-done-function') === 'true';
+      if (doneFunctionExists) {
+        timerCallback(null);
+      } else {
+        sweetAlert.close();
+      }
+    }, timer);
+  }
+};
+
+/*
+ * Reset the styling of the input
+ * (for example if errors have been shown)
+ */
+var resetInput = function resetInput() {
+  var $modal = getModal();
+  var $input = getInput();
+
+  _removeClass$getTopMargin$fadeIn$show$addClass.removeClass($modal, 'show-input');
+  $input.value = _defaultParams2['default'].inputValue;
+  $input.setAttribute('type', _defaultParams2['default'].inputType);
+  $input.setAttribute('placeholder', _defaultParams2['default'].inputPlaceholder);
+
+  resetInputError();
+};
+
+var resetInputError = function resetInputError(event) {
+  // If press enter => ignore
+  if (event && event.keyCode === 13) {
+    return false;
+  }
+
+  var $modal = getModal();
+
+  var $errorIcon = $modal.querySelector('.sa-input-error');
+  _removeClass$getTopMargin$fadeIn$show$addClass.removeClass($errorIcon, 'show');
+
+  var $errorContainer = $modal.querySelector('.sa-error-container');
+  _removeClass$getTopMargin$fadeIn$show$addClass.removeClass($errorContainer, 'show');
+};
+
+/*
+ * Set "margin-top"-property on modal based on its computed height
+ */
+var fixVerticalPosition = function fixVerticalPosition() {
+  var $modal = getModal();
+  $modal.style.marginTop = _removeClass$getTopMargin$fadeIn$show$addClass.getTopMargin(getModal());
+};
+
+exports.sweetAlertInitialize = sweetAlertInitialize;
+exports.getModal = getModal;
+exports.getOverlay = getOverlay;
+exports.getInput = getInput;
+exports.setFocusStyle = setFocusStyle;
+exports.openModal = openModal;
+exports.resetInput = resetInput;
+exports.resetInputError = resetInputError;
+exports.fixVerticalPosition = fixVerticalPosition;
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
 /* WEBPACK VAR INJECTION */(function(process) {
 
 var utils = __webpack_require__(0);
-var normalizeHeaderName = __webpack_require__(20);
+var normalizeHeaderName = __webpack_require__(29);
 
 var DEFAULT_CONTENT_TYPE = {
   'Content-Type': 'application/x-www-form-urlencoded'
@@ -397,10 +846,10 @@ function getDefaultAdapter() {
   var adapter;
   if (typeof XMLHttpRequest !== 'undefined') {
     // For browsers use XHR adapter
-    adapter = __webpack_require__(4);
+    adapter = __webpack_require__(8);
   } else if (typeof process !== 'undefined') {
     // For node use HTTP adapter
-    adapter = __webpack_require__(4);
+    adapter = __webpack_require__(8);
   }
   return adapter;
 }
@@ -471,10 +920,10 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 
 module.exports = defaults;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(19)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(28)))
 
 /***/ }),
-/* 2 */
+/* 5 */
 /***/ (function(module, exports) {
 
 var g;
@@ -501,7 +950,45 @@ module.exports = g;
 
 
 /***/ }),
-/* 3 */
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+var defaultParams = {
+  title: '',
+  text: '',
+  type: null,
+  allowOutsideClick: false,
+  showConfirmButton: true,
+  showCancelButton: false,
+  closeOnConfirm: true,
+  closeOnCancel: true,
+  confirmButtonText: 'OK',
+  confirmButtonColor: '#8CD4F5',
+  cancelButtonText: 'Cancel',
+  imageUrl: null,
+  imageSize: null,
+  timer: null,
+  customClass: '',
+  html: false,
+  animation: true,
+  allowEscapeKey: true,
+  inputType: 'text',
+  inputPlaceholder: '',
+  inputValue: '',
+  showLoaderOnConfirm: false
+};
+
+exports['default'] = defaultParams;
+module.exports = exports['default'];
+
+/***/ }),
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -519,19 +1006,19 @@ module.exports = function bind(fn, thisArg) {
 
 
 /***/ }),
-/* 4 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var utils = __webpack_require__(0);
-var settle = __webpack_require__(21);
-var buildURL = __webpack_require__(23);
-var parseHeaders = __webpack_require__(24);
-var isURLSameOrigin = __webpack_require__(25);
-var createError = __webpack_require__(5);
-var btoa = (typeof window !== 'undefined' && window.btoa && window.btoa.bind(window)) || __webpack_require__(26);
+var settle = __webpack_require__(30);
+var buildURL = __webpack_require__(32);
+var parseHeaders = __webpack_require__(33);
+var isURLSameOrigin = __webpack_require__(34);
+var createError = __webpack_require__(9);
+var btoa = (typeof window !== 'undefined' && window.btoa && window.btoa.bind(window)) || __webpack_require__(35);
 
 module.exports = function xhrAdapter(config) {
   return new Promise(function dispatchXhrRequest(resolve, reject) {
@@ -628,7 +1115,7 @@ module.exports = function xhrAdapter(config) {
     // This is only done if running in a standard browser environment.
     // Specifically not if we're in a web worker, or react-native.
     if (utils.isStandardBrowserEnv()) {
-      var cookies = __webpack_require__(27);
+      var cookies = __webpack_require__(36);
 
       // Add xsrf header
       var xsrfValue = (config.withCredentials || isURLSameOrigin(config.url)) && config.xsrfCookieName ?
@@ -706,13 +1193,13 @@ module.exports = function xhrAdapter(config) {
 
 
 /***/ }),
-/* 5 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var enhanceError = __webpack_require__(22);
+var enhanceError = __webpack_require__(31);
 
 /**
  * Create an Error with the specified message, config, error code, request and response.
@@ -731,7 +1218,7 @@ module.exports = function createError(message, config, code, request, response) 
 
 
 /***/ }),
-/* 6 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -743,7 +1230,7 @@ module.exports = function isCancel(value) {
 
 
 /***/ }),
-/* 7 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -769,15 +1256,15 @@ module.exports = Cancel;
 
 
 /***/ }),
-/* 8 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(9);
-module.exports = __webpack_require__(40);
+__webpack_require__(13);
+module.exports = __webpack_require__(49);
 
 
 /***/ }),
-/* 9 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -787,9 +1274,9 @@ module.exports = __webpack_require__(40);
  * building robust, powerful web applications using Vue and Laravel.
  */
 
-__webpack_require__(10);
+__webpack_require__(14);
 
-window.Vue = __webpack_require__(35);
+window.Vue = __webpack_require__(44);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -797,18 +1284,18 @@ window.Vue = __webpack_require__(35);
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-Vue.component('example', __webpack_require__(36));
+Vue.component('example', __webpack_require__(45));
 
 var app = new Vue({
   el: '#app'
 });
 
 /***/ }),
-/* 10 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-window._ = __webpack_require__(11);
+window._ = __webpack_require__(15);
 
 /**
  * We'll load jQuery and the Bootstrap jQuery plugin which provides support
@@ -817,10 +1304,10 @@ window._ = __webpack_require__(11);
  */
 
 try {
-  window.$ = window.jQuery = __webpack_require__(13);
+  window.$ = window.jQuery = __webpack_require__(17);
 
-  __webpack_require__(14);
-  __webpack_require__(54);
+  __webpack_require__(59);
+  __webpack_require__(19);
 } catch (e) {}
 
 /**
@@ -829,7 +1316,7 @@ try {
  * CSRF token as a header based on the value of the "XSRF" token cookie.
  */
 
-window.axios = __webpack_require__(15);
+window.axios = __webpack_require__(24);
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
@@ -863,7 +1350,7 @@ if (token) {
 // });
 
 /***/ }),
-/* 11 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, module) {var __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -17952,10 +18439,10 @@ if (token) {
   }
 }.call(this));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2), __webpack_require__(12)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5), __webpack_require__(16)(module)))
 
 /***/ }),
-/* 12 */
+/* 16 */
 /***/ (function(module, exports) {
 
 module.exports = function(module) {
@@ -17983,7 +18470,7 @@ module.exports = function(module) {
 
 
 /***/ }),
-/* 13 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -28243,2405 +28730,837 @@ return jQuery;
 
 
 /***/ }),
-/* 14 */
-/***/ (function(module, exports) {
-
-/*!
- * Bootstrap v3.3.7 (http://getbootstrap.com)
- * Copyright 2011-2016 Twitter, Inc.
- * Licensed under the MIT license
- */
-
-if (typeof jQuery === 'undefined') {
-  throw new Error('Bootstrap\'s JavaScript requires jQuery')
-}
-
-+function ($) {
-  'use strict';
-  var version = $.fn.jquery.split(' ')[0].split('.')
-  if ((version[0] < 2 && version[1] < 9) || (version[0] == 1 && version[1] == 9 && version[2] < 1) || (version[0] > 3)) {
-    throw new Error('Bootstrap\'s JavaScript requires jQuery version 1.9.1 or higher, but lower than version 4')
-  }
-}(jQuery);
-
-/* ========================================================================
- * Bootstrap: transition.js v3.3.7
- * http://getbootstrap.com/javascript/#transitions
- * ========================================================================
- * Copyright 2011-2016 Twitter, Inc.
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
- * ======================================================================== */
-
-
-+function ($) {
-  'use strict';
-
-  // CSS TRANSITION SUPPORT (Shoutout: http://www.modernizr.com/)
-  // ============================================================
-
-  function transitionEnd() {
-    var el = document.createElement('bootstrap')
-
-    var transEndEventNames = {
-      WebkitTransition : 'webkitTransitionEnd',
-      MozTransition    : 'transitionend',
-      OTransition      : 'oTransitionEnd otransitionend',
-      transition       : 'transitionend'
-    }
-
-    for (var name in transEndEventNames) {
-      if (el.style[name] !== undefined) {
-        return { end: transEndEventNames[name] }
-      }
-    }
-
-    return false // explicit for ie8 (  ._.)
-  }
-
-  // http://blog.alexmaccaw.com/css-transitions
-  $.fn.emulateTransitionEnd = function (duration) {
-    var called = false
-    var $el = this
-    $(this).one('bsTransitionEnd', function () { called = true })
-    var callback = function () { if (!called) $($el).trigger($.support.transition.end) }
-    setTimeout(callback, duration)
-    return this
-  }
-
-  $(function () {
-    $.support.transition = transitionEnd()
-
-    if (!$.support.transition) return
-
-    $.event.special.bsTransitionEnd = {
-      bindType: $.support.transition.end,
-      delegateType: $.support.transition.end,
-      handle: function (e) {
-        if ($(e.target).is(this)) return e.handleObj.handler.apply(this, arguments)
-      }
-    }
-  })
-
-}(jQuery);
-
-/* ========================================================================
- * Bootstrap: alert.js v3.3.7
- * http://getbootstrap.com/javascript/#alerts
- * ========================================================================
- * Copyright 2011-2016 Twitter, Inc.
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
- * ======================================================================== */
-
-
-+function ($) {
-  'use strict';
-
-  // ALERT CLASS DEFINITION
-  // ======================
-
-  var dismiss = '[data-dismiss="alert"]'
-  var Alert   = function (el) {
-    $(el).on('click', dismiss, this.close)
-  }
-
-  Alert.VERSION = '3.3.7'
-
-  Alert.TRANSITION_DURATION = 150
-
-  Alert.prototype.close = function (e) {
-    var $this    = $(this)
-    var selector = $this.attr('data-target')
-
-    if (!selector) {
-      selector = $this.attr('href')
-      selector = selector && selector.replace(/.*(?=#[^\s]*$)/, '') // strip for ie7
-    }
-
-    var $parent = $(selector === '#' ? [] : selector)
-
-    if (e) e.preventDefault()
-
-    if (!$parent.length) {
-      $parent = $this.closest('.alert')
-    }
-
-    $parent.trigger(e = $.Event('close.bs.alert'))
-
-    if (e.isDefaultPrevented()) return
-
-    $parent.removeClass('in')
-
-    function removeElement() {
-      // detach from parent, fire event then clean up data
-      $parent.detach().trigger('closed.bs.alert').remove()
-    }
-
-    $.support.transition && $parent.hasClass('fade') ?
-      $parent
-        .one('bsTransitionEnd', removeElement)
-        .emulateTransitionEnd(Alert.TRANSITION_DURATION) :
-      removeElement()
-  }
-
-
-  // ALERT PLUGIN DEFINITION
-  // =======================
-
-  function Plugin(option) {
-    return this.each(function () {
-      var $this = $(this)
-      var data  = $this.data('bs.alert')
-
-      if (!data) $this.data('bs.alert', (data = new Alert(this)))
-      if (typeof option == 'string') data[option].call($this)
-    })
-  }
-
-  var old = $.fn.alert
-
-  $.fn.alert             = Plugin
-  $.fn.alert.Constructor = Alert
-
-
-  // ALERT NO CONFLICT
-  // =================
-
-  $.fn.alert.noConflict = function () {
-    $.fn.alert = old
-    return this
-  }
-
-
-  // ALERT DATA-API
-  // ==============
-
-  $(document).on('click.bs.alert.data-api', dismiss, Alert.prototype.close)
-
-}(jQuery);
-
-/* ========================================================================
- * Bootstrap: button.js v3.3.7
- * http://getbootstrap.com/javascript/#buttons
- * ========================================================================
- * Copyright 2011-2016 Twitter, Inc.
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
- * ======================================================================== */
-
-
-+function ($) {
-  'use strict';
-
-  // BUTTON PUBLIC CLASS DEFINITION
-  // ==============================
-
-  var Button = function (element, options) {
-    this.$element  = $(element)
-    this.options   = $.extend({}, Button.DEFAULTS, options)
-    this.isLoading = false
-  }
-
-  Button.VERSION  = '3.3.7'
-
-  Button.DEFAULTS = {
-    loadingText: 'loading...'
-  }
-
-  Button.prototype.setState = function (state) {
-    var d    = 'disabled'
-    var $el  = this.$element
-    var val  = $el.is('input') ? 'val' : 'html'
-    var data = $el.data()
-
-    state += 'Text'
-
-    if (data.resetText == null) $el.data('resetText', $el[val]())
-
-    // push to event loop to allow forms to submit
-    setTimeout($.proxy(function () {
-      $el[val](data[state] == null ? this.options[state] : data[state])
-
-      if (state == 'loadingText') {
-        this.isLoading = true
-        $el.addClass(d).attr(d, d).prop(d, true)
-      } else if (this.isLoading) {
-        this.isLoading = false
-        $el.removeClass(d).removeAttr(d).prop(d, false)
-      }
-    }, this), 0)
-  }
-
-  Button.prototype.toggle = function () {
-    var changed = true
-    var $parent = this.$element.closest('[data-toggle="buttons"]')
-
-    if ($parent.length) {
-      var $input = this.$element.find('input')
-      if ($input.prop('type') == 'radio') {
-        if ($input.prop('checked')) changed = false
-        $parent.find('.active').removeClass('active')
-        this.$element.addClass('active')
-      } else if ($input.prop('type') == 'checkbox') {
-        if (($input.prop('checked')) !== this.$element.hasClass('active')) changed = false
-        this.$element.toggleClass('active')
-      }
-      $input.prop('checked', this.$element.hasClass('active'))
-      if (changed) $input.trigger('change')
-    } else {
-      this.$element.attr('aria-pressed', !this.$element.hasClass('active'))
-      this.$element.toggleClass('active')
-    }
-  }
-
-
-  // BUTTON PLUGIN DEFINITION
-  // ========================
-
-  function Plugin(option) {
-    return this.each(function () {
-      var $this   = $(this)
-      var data    = $this.data('bs.button')
-      var options = typeof option == 'object' && option
-
-      if (!data) $this.data('bs.button', (data = new Button(this, options)))
-
-      if (option == 'toggle') data.toggle()
-      else if (option) data.setState(option)
-    })
-  }
-
-  var old = $.fn.button
-
-  $.fn.button             = Plugin
-  $.fn.button.Constructor = Button
-
-
-  // BUTTON NO CONFLICT
-  // ==================
-
-  $.fn.button.noConflict = function () {
-    $.fn.button = old
-    return this
-  }
-
-
-  // BUTTON DATA-API
-  // ===============
-
-  $(document)
-    .on('click.bs.button.data-api', '[data-toggle^="button"]', function (e) {
-      var $btn = $(e.target).closest('.btn')
-      Plugin.call($btn, 'toggle')
-      if (!($(e.target).is('input[type="radio"], input[type="checkbox"]'))) {
-        // Prevent double click on radios, and the double selections (so cancellation) on checkboxes
-        e.preventDefault()
-        // The target component still receive the focus
-        if ($btn.is('input,button')) $btn.trigger('focus')
-        else $btn.find('input:visible,button:visible').first().trigger('focus')
-      }
-    })
-    .on('focus.bs.button.data-api blur.bs.button.data-api', '[data-toggle^="button"]', function (e) {
-      $(e.target).closest('.btn').toggleClass('focus', /^focus(in)?$/.test(e.type))
-    })
-
-}(jQuery);
-
-/* ========================================================================
- * Bootstrap: carousel.js v3.3.7
- * http://getbootstrap.com/javascript/#carousel
- * ========================================================================
- * Copyright 2011-2016 Twitter, Inc.
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
- * ======================================================================== */
-
-
-+function ($) {
-  'use strict';
-
-  // CAROUSEL CLASS DEFINITION
-  // =========================
-
-  var Carousel = function (element, options) {
-    this.$element    = $(element)
-    this.$indicators = this.$element.find('.carousel-indicators')
-    this.options     = options
-    this.paused      = null
-    this.sliding     = null
-    this.interval    = null
-    this.$active     = null
-    this.$items      = null
-
-    this.options.keyboard && this.$element.on('keydown.bs.carousel', $.proxy(this.keydown, this))
-
-    this.options.pause == 'hover' && !('ontouchstart' in document.documentElement) && this.$element
-      .on('mouseenter.bs.carousel', $.proxy(this.pause, this))
-      .on('mouseleave.bs.carousel', $.proxy(this.cycle, this))
-  }
-
-  Carousel.VERSION  = '3.3.7'
-
-  Carousel.TRANSITION_DURATION = 600
-
-  Carousel.DEFAULTS = {
-    interval: 5000,
-    pause: 'hover',
-    wrap: true,
-    keyboard: true
-  }
-
-  Carousel.prototype.keydown = function (e) {
-    if (/input|textarea/i.test(e.target.tagName)) return
-    switch (e.which) {
-      case 37: this.prev(); break
-      case 39: this.next(); break
-      default: return
-    }
-
-    e.preventDefault()
-  }
-
-  Carousel.prototype.cycle = function (e) {
-    e || (this.paused = false)
-
-    this.interval && clearInterval(this.interval)
-
-    this.options.interval
-      && !this.paused
-      && (this.interval = setInterval($.proxy(this.next, this), this.options.interval))
-
-    return this
-  }
-
-  Carousel.prototype.getItemIndex = function (item) {
-    this.$items = item.parent().children('.item')
-    return this.$items.index(item || this.$active)
-  }
-
-  Carousel.prototype.getItemForDirection = function (direction, active) {
-    var activeIndex = this.getItemIndex(active)
-    var willWrap = (direction == 'prev' && activeIndex === 0)
-                || (direction == 'next' && activeIndex == (this.$items.length - 1))
-    if (willWrap && !this.options.wrap) return active
-    var delta = direction == 'prev' ? -1 : 1
-    var itemIndex = (activeIndex + delta) % this.$items.length
-    return this.$items.eq(itemIndex)
-  }
-
-  Carousel.prototype.to = function (pos) {
-    var that        = this
-    var activeIndex = this.getItemIndex(this.$active = this.$element.find('.item.active'))
-
-    if (pos > (this.$items.length - 1) || pos < 0) return
-
-    if (this.sliding)       return this.$element.one('slid.bs.carousel', function () { that.to(pos) }) // yes, "slid"
-    if (activeIndex == pos) return this.pause().cycle()
-
-    return this.slide(pos > activeIndex ? 'next' : 'prev', this.$items.eq(pos))
-  }
-
-  Carousel.prototype.pause = function (e) {
-    e || (this.paused = true)
-
-    if (this.$element.find('.next, .prev').length && $.support.transition) {
-      this.$element.trigger($.support.transition.end)
-      this.cycle(true)
-    }
-
-    this.interval = clearInterval(this.interval)
-
-    return this
-  }
-
-  Carousel.prototype.next = function () {
-    if (this.sliding) return
-    return this.slide('next')
-  }
-
-  Carousel.prototype.prev = function () {
-    if (this.sliding) return
-    return this.slide('prev')
-  }
-
-  Carousel.prototype.slide = function (type, next) {
-    var $active   = this.$element.find('.item.active')
-    var $next     = next || this.getItemForDirection(type, $active)
-    var isCycling = this.interval
-    var direction = type == 'next' ? 'left' : 'right'
-    var that      = this
-
-    if ($next.hasClass('active')) return (this.sliding = false)
-
-    var relatedTarget = $next[0]
-    var slideEvent = $.Event('slide.bs.carousel', {
-      relatedTarget: relatedTarget,
-      direction: direction
-    })
-    this.$element.trigger(slideEvent)
-    if (slideEvent.isDefaultPrevented()) return
-
-    this.sliding = true
-
-    isCycling && this.pause()
-
-    if (this.$indicators.length) {
-      this.$indicators.find('.active').removeClass('active')
-      var $nextIndicator = $(this.$indicators.children()[this.getItemIndex($next)])
-      $nextIndicator && $nextIndicator.addClass('active')
-    }
-
-    var slidEvent = $.Event('slid.bs.carousel', { relatedTarget: relatedTarget, direction: direction }) // yes, "slid"
-    if ($.support.transition && this.$element.hasClass('slide')) {
-      $next.addClass(type)
-      $next[0].offsetWidth // force reflow
-      $active.addClass(direction)
-      $next.addClass(direction)
-      $active
-        .one('bsTransitionEnd', function () {
-          $next.removeClass([type, direction].join(' ')).addClass('active')
-          $active.removeClass(['active', direction].join(' '))
-          that.sliding = false
-          setTimeout(function () {
-            that.$element.trigger(slidEvent)
-          }, 0)
-        })
-        .emulateTransitionEnd(Carousel.TRANSITION_DURATION)
-    } else {
-      $active.removeClass('active')
-      $next.addClass('active')
-      this.sliding = false
-      this.$element.trigger(slidEvent)
-    }
-
-    isCycling && this.cycle()
-
-    return this
-  }
-
-
-  // CAROUSEL PLUGIN DEFINITION
-  // ==========================
-
-  function Plugin(option) {
-    return this.each(function () {
-      var $this   = $(this)
-      var data    = $this.data('bs.carousel')
-      var options = $.extend({}, Carousel.DEFAULTS, $this.data(), typeof option == 'object' && option)
-      var action  = typeof option == 'string' ? option : options.slide
-
-      if (!data) $this.data('bs.carousel', (data = new Carousel(this, options)))
-      if (typeof option == 'number') data.to(option)
-      else if (action) data[action]()
-      else if (options.interval) data.pause().cycle()
-    })
-  }
-
-  var old = $.fn.carousel
-
-  $.fn.carousel             = Plugin
-  $.fn.carousel.Constructor = Carousel
-
-
-  // CAROUSEL NO CONFLICT
-  // ====================
-
-  $.fn.carousel.noConflict = function () {
-    $.fn.carousel = old
-    return this
-  }
-
-
-  // CAROUSEL DATA-API
-  // =================
-
-  var clickHandler = function (e) {
-    var href
-    var $this   = $(this)
-    var $target = $($this.attr('data-target') || (href = $this.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, '')) // strip for ie7
-    if (!$target.hasClass('carousel')) return
-    var options = $.extend({}, $target.data(), $this.data())
-    var slideIndex = $this.attr('data-slide-to')
-    if (slideIndex) options.interval = false
-
-    Plugin.call($target, options)
-
-    if (slideIndex) {
-      $target.data('bs.carousel').to(slideIndex)
-    }
-
-    e.preventDefault()
-  }
-
-  $(document)
-    .on('click.bs.carousel.data-api', '[data-slide]', clickHandler)
-    .on('click.bs.carousel.data-api', '[data-slide-to]', clickHandler)
-
-  $(window).on('load', function () {
-    $('[data-ride="carousel"]').each(function () {
-      var $carousel = $(this)
-      Plugin.call($carousel, $carousel.data())
-    })
-  })
-
-}(jQuery);
-
-/* ========================================================================
- * Bootstrap: collapse.js v3.3.7
- * http://getbootstrap.com/javascript/#collapse
- * ========================================================================
- * Copyright 2011-2016 Twitter, Inc.
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
- * ======================================================================== */
-
-/* jshint latedef: false */
-
-+function ($) {
-  'use strict';
-
-  // COLLAPSE PUBLIC CLASS DEFINITION
-  // ================================
-
-  var Collapse = function (element, options) {
-    this.$element      = $(element)
-    this.options       = $.extend({}, Collapse.DEFAULTS, options)
-    this.$trigger      = $('[data-toggle="collapse"][href="#' + element.id + '"],' +
-                           '[data-toggle="collapse"][data-target="#' + element.id + '"]')
-    this.transitioning = null
-
-    if (this.options.parent) {
-      this.$parent = this.getParent()
-    } else {
-      this.addAriaAndCollapsedClass(this.$element, this.$trigger)
-    }
-
-    if (this.options.toggle) this.toggle()
-  }
-
-  Collapse.VERSION  = '3.3.7'
-
-  Collapse.TRANSITION_DURATION = 350
-
-  Collapse.DEFAULTS = {
-    toggle: true
-  }
-
-  Collapse.prototype.dimension = function () {
-    var hasWidth = this.$element.hasClass('width')
-    return hasWidth ? 'width' : 'height'
-  }
-
-  Collapse.prototype.show = function () {
-    if (this.transitioning || this.$element.hasClass('in')) return
-
-    var activesData
-    var actives = this.$parent && this.$parent.children('.panel').children('.in, .collapsing')
-
-    if (actives && actives.length) {
-      activesData = actives.data('bs.collapse')
-      if (activesData && activesData.transitioning) return
-    }
-
-    var startEvent = $.Event('show.bs.collapse')
-    this.$element.trigger(startEvent)
-    if (startEvent.isDefaultPrevented()) return
-
-    if (actives && actives.length) {
-      Plugin.call(actives, 'hide')
-      activesData || actives.data('bs.collapse', null)
-    }
-
-    var dimension = this.dimension()
-
-    this.$element
-      .removeClass('collapse')
-      .addClass('collapsing')[dimension](0)
-      .attr('aria-expanded', true)
-
-    this.$trigger
-      .removeClass('collapsed')
-      .attr('aria-expanded', true)
-
-    this.transitioning = 1
-
-    var complete = function () {
-      this.$element
-        .removeClass('collapsing')
-        .addClass('collapse in')[dimension]('')
-      this.transitioning = 0
-      this.$element
-        .trigger('shown.bs.collapse')
-    }
-
-    if (!$.support.transition) return complete.call(this)
-
-    var scrollSize = $.camelCase(['scroll', dimension].join('-'))
-
-    this.$element
-      .one('bsTransitionEnd', $.proxy(complete, this))
-      .emulateTransitionEnd(Collapse.TRANSITION_DURATION)[dimension](this.$element[0][scrollSize])
-  }
-
-  Collapse.prototype.hide = function () {
-    if (this.transitioning || !this.$element.hasClass('in')) return
-
-    var startEvent = $.Event('hide.bs.collapse')
-    this.$element.trigger(startEvent)
-    if (startEvent.isDefaultPrevented()) return
-
-    var dimension = this.dimension()
-
-    this.$element[dimension](this.$element[dimension]())[0].offsetHeight
-
-    this.$element
-      .addClass('collapsing')
-      .removeClass('collapse in')
-      .attr('aria-expanded', false)
-
-    this.$trigger
-      .addClass('collapsed')
-      .attr('aria-expanded', false)
-
-    this.transitioning = 1
-
-    var complete = function () {
-      this.transitioning = 0
-      this.$element
-        .removeClass('collapsing')
-        .addClass('collapse')
-        .trigger('hidden.bs.collapse')
-    }
-
-    if (!$.support.transition) return complete.call(this)
-
-    this.$element
-      [dimension](0)
-      .one('bsTransitionEnd', $.proxy(complete, this))
-      .emulateTransitionEnd(Collapse.TRANSITION_DURATION)
-  }
-
-  Collapse.prototype.toggle = function () {
-    this[this.$element.hasClass('in') ? 'hide' : 'show']()
-  }
-
-  Collapse.prototype.getParent = function () {
-    return $(this.options.parent)
-      .find('[data-toggle="collapse"][data-parent="' + this.options.parent + '"]')
-      .each($.proxy(function (i, element) {
-        var $element = $(element)
-        this.addAriaAndCollapsedClass(getTargetFromTrigger($element), $element)
-      }, this))
-      .end()
-  }
-
-  Collapse.prototype.addAriaAndCollapsedClass = function ($element, $trigger) {
-    var isOpen = $element.hasClass('in')
-
-    $element.attr('aria-expanded', isOpen)
-    $trigger
-      .toggleClass('collapsed', !isOpen)
-      .attr('aria-expanded', isOpen)
-  }
-
-  function getTargetFromTrigger($trigger) {
-    var href
-    var target = $trigger.attr('data-target')
-      || (href = $trigger.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, '') // strip for ie7
-
-    return $(target)
-  }
-
-
-  // COLLAPSE PLUGIN DEFINITION
-  // ==========================
-
-  function Plugin(option) {
-    return this.each(function () {
-      var $this   = $(this)
-      var data    = $this.data('bs.collapse')
-      var options = $.extend({}, Collapse.DEFAULTS, $this.data(), typeof option == 'object' && option)
-
-      if (!data && options.toggle && /show|hide/.test(option)) options.toggle = false
-      if (!data) $this.data('bs.collapse', (data = new Collapse(this, options)))
-      if (typeof option == 'string') data[option]()
-    })
-  }
-
-  var old = $.fn.collapse
-
-  $.fn.collapse             = Plugin
-  $.fn.collapse.Constructor = Collapse
-
-
-  // COLLAPSE NO CONFLICT
-  // ====================
-
-  $.fn.collapse.noConflict = function () {
-    $.fn.collapse = old
-    return this
-  }
-
-
-  // COLLAPSE DATA-API
-  // =================
-
-  $(document).on('click.bs.collapse.data-api', '[data-toggle="collapse"]', function (e) {
-    var $this   = $(this)
-
-    if (!$this.attr('data-target')) e.preventDefault()
-
-    var $target = getTargetFromTrigger($this)
-    var data    = $target.data('bs.collapse')
-    var option  = data ? 'toggle' : $this.data()
-
-    Plugin.call($target, option)
-  })
-
-}(jQuery);
-
-/* ========================================================================
- * Bootstrap: dropdown.js v3.3.7
- * http://getbootstrap.com/javascript/#dropdowns
- * ========================================================================
- * Copyright 2011-2016 Twitter, Inc.
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
- * ======================================================================== */
-
-
-+function ($) {
-  'use strict';
-
-  // DROPDOWN CLASS DEFINITION
-  // =========================
-
-  var backdrop = '.dropdown-backdrop'
-  var toggle   = '[data-toggle="dropdown"]'
-  var Dropdown = function (element) {
-    $(element).on('click.bs.dropdown', this.toggle)
-  }
-
-  Dropdown.VERSION = '3.3.7'
-
-  function getParent($this) {
-    var selector = $this.attr('data-target')
-
-    if (!selector) {
-      selector = $this.attr('href')
-      selector = selector && /#[A-Za-z]/.test(selector) && selector.replace(/.*(?=#[^\s]*$)/, '') // strip for ie7
-    }
-
-    var $parent = selector && $(selector)
-
-    return $parent && $parent.length ? $parent : $this.parent()
-  }
-
-  function clearMenus(e) {
-    if (e && e.which === 3) return
-    $(backdrop).remove()
-    $(toggle).each(function () {
-      var $this         = $(this)
-      var $parent       = getParent($this)
-      var relatedTarget = { relatedTarget: this }
-
-      if (!$parent.hasClass('open')) return
-
-      if (e && e.type == 'click' && /input|textarea/i.test(e.target.tagName) && $.contains($parent[0], e.target)) return
-
-      $parent.trigger(e = $.Event('hide.bs.dropdown', relatedTarget))
-
-      if (e.isDefaultPrevented()) return
-
-      $this.attr('aria-expanded', 'false')
-      $parent.removeClass('open').trigger($.Event('hidden.bs.dropdown', relatedTarget))
-    })
-  }
-
-  Dropdown.prototype.toggle = function (e) {
-    var $this = $(this)
-
-    if ($this.is('.disabled, :disabled')) return
-
-    var $parent  = getParent($this)
-    var isActive = $parent.hasClass('open')
-
-    clearMenus()
-
-    if (!isActive) {
-      if ('ontouchstart' in document.documentElement && !$parent.closest('.navbar-nav').length) {
-        // if mobile we use a backdrop because click events don't delegate
-        $(document.createElement('div'))
-          .addClass('dropdown-backdrop')
-          .insertAfter($(this))
-          .on('click', clearMenus)
-      }
-
-      var relatedTarget = { relatedTarget: this }
-      $parent.trigger(e = $.Event('show.bs.dropdown', relatedTarget))
-
-      if (e.isDefaultPrevented()) return
-
-      $this
-        .trigger('focus')
-        .attr('aria-expanded', 'true')
-
-      $parent
-        .toggleClass('open')
-        .trigger($.Event('shown.bs.dropdown', relatedTarget))
-    }
-
-    return false
-  }
-
-  Dropdown.prototype.keydown = function (e) {
-    if (!/(38|40|27|32)/.test(e.which) || /input|textarea/i.test(e.target.tagName)) return
-
-    var $this = $(this)
-
-    e.preventDefault()
-    e.stopPropagation()
-
-    if ($this.is('.disabled, :disabled')) return
-
-    var $parent  = getParent($this)
-    var isActive = $parent.hasClass('open')
-
-    if (!isActive && e.which != 27 || isActive && e.which == 27) {
-      if (e.which == 27) $parent.find(toggle).trigger('focus')
-      return $this.trigger('click')
-    }
-
-    var desc = ' li:not(.disabled):visible a'
-    var $items = $parent.find('.dropdown-menu' + desc)
-
-    if (!$items.length) return
-
-    var index = $items.index(e.target)
-
-    if (e.which == 38 && index > 0)                 index--         // up
-    if (e.which == 40 && index < $items.length - 1) index++         // down
-    if (!~index)                                    index = 0
-
-    $items.eq(index).trigger('focus')
-  }
-
-
-  // DROPDOWN PLUGIN DEFINITION
-  // ==========================
-
-  function Plugin(option) {
-    return this.each(function () {
-      var $this = $(this)
-      var data  = $this.data('bs.dropdown')
-
-      if (!data) $this.data('bs.dropdown', (data = new Dropdown(this)))
-      if (typeof option == 'string') data[option].call($this)
-    })
-  }
-
-  var old = $.fn.dropdown
-
-  $.fn.dropdown             = Plugin
-  $.fn.dropdown.Constructor = Dropdown
-
-
-  // DROPDOWN NO CONFLICT
-  // ====================
-
-  $.fn.dropdown.noConflict = function () {
-    $.fn.dropdown = old
-    return this
-  }
-
-
-  // APPLY TO STANDARD DROPDOWN ELEMENTS
-  // ===================================
-
-  $(document)
-    .on('click.bs.dropdown.data-api', clearMenus)
-    .on('click.bs.dropdown.data-api', '.dropdown form', function (e) { e.stopPropagation() })
-    .on('click.bs.dropdown.data-api', toggle, Dropdown.prototype.toggle)
-    .on('keydown.bs.dropdown.data-api', toggle, Dropdown.prototype.keydown)
-    .on('keydown.bs.dropdown.data-api', '.dropdown-menu', Dropdown.prototype.keydown)
-
-}(jQuery);
-
-/* ========================================================================
- * Bootstrap: modal.js v3.3.7
- * http://getbootstrap.com/javascript/#modals
- * ========================================================================
- * Copyright 2011-2016 Twitter, Inc.
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
- * ======================================================================== */
-
-
-+function ($) {
-  'use strict';
-
-  // MODAL CLASS DEFINITION
-  // ======================
-
-  var Modal = function (element, options) {
-    this.options             = options
-    this.$body               = $(document.body)
-    this.$element            = $(element)
-    this.$dialog             = this.$element.find('.modal-dialog')
-    this.$backdrop           = null
-    this.isShown             = null
-    this.originalBodyPad     = null
-    this.scrollbarWidth      = 0
-    this.ignoreBackdropClick = false
-
-    if (this.options.remote) {
-      this.$element
-        .find('.modal-content')
-        .load(this.options.remote, $.proxy(function () {
-          this.$element.trigger('loaded.bs.modal')
-        }, this))
-    }
-  }
-
-  Modal.VERSION  = '3.3.7'
-
-  Modal.TRANSITION_DURATION = 300
-  Modal.BACKDROP_TRANSITION_DURATION = 150
-
-  Modal.DEFAULTS = {
-    backdrop: true,
-    keyboard: true,
-    show: true
-  }
-
-  Modal.prototype.toggle = function (_relatedTarget) {
-    return this.isShown ? this.hide() : this.show(_relatedTarget)
-  }
-
-  Modal.prototype.show = function (_relatedTarget) {
-    var that = this
-    var e    = $.Event('show.bs.modal', { relatedTarget: _relatedTarget })
-
-    this.$element.trigger(e)
-
-    if (this.isShown || e.isDefaultPrevented()) return
-
-    this.isShown = true
-
-    this.checkScrollbar()
-    this.setScrollbar()
-    this.$body.addClass('modal-open')
-
-    this.escape()
-    this.resize()
-
-    this.$element.on('click.dismiss.bs.modal', '[data-dismiss="modal"]', $.proxy(this.hide, this))
-
-    this.$dialog.on('mousedown.dismiss.bs.modal', function () {
-      that.$element.one('mouseup.dismiss.bs.modal', function (e) {
-        if ($(e.target).is(that.$element)) that.ignoreBackdropClick = true
-      })
-    })
-
-    this.backdrop(function () {
-      var transition = $.support.transition && that.$element.hasClass('fade')
-
-      if (!that.$element.parent().length) {
-        that.$element.appendTo(that.$body) // don't move modals dom position
-      }
-
-      that.$element
-        .show()
-        .scrollTop(0)
-
-      that.adjustDialog()
-
-      if (transition) {
-        that.$element[0].offsetWidth // force reflow
-      }
-
-      that.$element.addClass('in')
-
-      that.enforceFocus()
-
-      var e = $.Event('shown.bs.modal', { relatedTarget: _relatedTarget })
-
-      transition ?
-        that.$dialog // wait for modal to slide in
-          .one('bsTransitionEnd', function () {
-            that.$element.trigger('focus').trigger(e)
-          })
-          .emulateTransitionEnd(Modal.TRANSITION_DURATION) :
-        that.$element.trigger('focus').trigger(e)
-    })
-  }
-
-  Modal.prototype.hide = function (e) {
-    if (e) e.preventDefault()
-
-    e = $.Event('hide.bs.modal')
-
-    this.$element.trigger(e)
-
-    if (!this.isShown || e.isDefaultPrevented()) return
-
-    this.isShown = false
-
-    this.escape()
-    this.resize()
-
-    $(document).off('focusin.bs.modal')
-
-    this.$element
-      .removeClass('in')
-      .off('click.dismiss.bs.modal')
-      .off('mouseup.dismiss.bs.modal')
-
-    this.$dialog.off('mousedown.dismiss.bs.modal')
-
-    $.support.transition && this.$element.hasClass('fade') ?
-      this.$element
-        .one('bsTransitionEnd', $.proxy(this.hideModal, this))
-        .emulateTransitionEnd(Modal.TRANSITION_DURATION) :
-      this.hideModal()
-  }
-
-  Modal.prototype.enforceFocus = function () {
-    $(document)
-      .off('focusin.bs.modal') // guard against infinite focus loop
-      .on('focusin.bs.modal', $.proxy(function (e) {
-        if (document !== e.target &&
-            this.$element[0] !== e.target &&
-            !this.$element.has(e.target).length) {
-          this.$element.trigger('focus')
-        }
-      }, this))
-  }
-
-  Modal.prototype.escape = function () {
-    if (this.isShown && this.options.keyboard) {
-      this.$element.on('keydown.dismiss.bs.modal', $.proxy(function (e) {
-        e.which == 27 && this.hide()
-      }, this))
-    } else if (!this.isShown) {
-      this.$element.off('keydown.dismiss.bs.modal')
-    }
-  }
-
-  Modal.prototype.resize = function () {
-    if (this.isShown) {
-      $(window).on('resize.bs.modal', $.proxy(this.handleUpdate, this))
-    } else {
-      $(window).off('resize.bs.modal')
-    }
-  }
-
-  Modal.prototype.hideModal = function () {
-    var that = this
-    this.$element.hide()
-    this.backdrop(function () {
-      that.$body.removeClass('modal-open')
-      that.resetAdjustments()
-      that.resetScrollbar()
-      that.$element.trigger('hidden.bs.modal')
-    })
-  }
-
-  Modal.prototype.removeBackdrop = function () {
-    this.$backdrop && this.$backdrop.remove()
-    this.$backdrop = null
-  }
-
-  Modal.prototype.backdrop = function (callback) {
-    var that = this
-    var animate = this.$element.hasClass('fade') ? 'fade' : ''
-
-    if (this.isShown && this.options.backdrop) {
-      var doAnimate = $.support.transition && animate
-
-      this.$backdrop = $(document.createElement('div'))
-        .addClass('modal-backdrop ' + animate)
-        .appendTo(this.$body)
-
-      this.$element.on('click.dismiss.bs.modal', $.proxy(function (e) {
-        if (this.ignoreBackdropClick) {
-          this.ignoreBackdropClick = false
-          return
-        }
-        if (e.target !== e.currentTarget) return
-        this.options.backdrop == 'static'
-          ? this.$element[0].focus()
-          : this.hide()
-      }, this))
-
-      if (doAnimate) this.$backdrop[0].offsetWidth // force reflow
-
-      this.$backdrop.addClass('in')
-
-      if (!callback) return
-
-      doAnimate ?
-        this.$backdrop
-          .one('bsTransitionEnd', callback)
-          .emulateTransitionEnd(Modal.BACKDROP_TRANSITION_DURATION) :
-        callback()
-
-    } else if (!this.isShown && this.$backdrop) {
-      this.$backdrop.removeClass('in')
-
-      var callbackRemove = function () {
-        that.removeBackdrop()
-        callback && callback()
-      }
-      $.support.transition && this.$element.hasClass('fade') ?
-        this.$backdrop
-          .one('bsTransitionEnd', callbackRemove)
-          .emulateTransitionEnd(Modal.BACKDROP_TRANSITION_DURATION) :
-        callbackRemove()
-
-    } else if (callback) {
-      callback()
-    }
-  }
-
-  // these following methods are used to handle overflowing modals
-
-  Modal.prototype.handleUpdate = function () {
-    this.adjustDialog()
-  }
-
-  Modal.prototype.adjustDialog = function () {
-    var modalIsOverflowing = this.$element[0].scrollHeight > document.documentElement.clientHeight
-
-    this.$element.css({
-      paddingLeft:  !this.bodyIsOverflowing && modalIsOverflowing ? this.scrollbarWidth : '',
-      paddingRight: this.bodyIsOverflowing && !modalIsOverflowing ? this.scrollbarWidth : ''
-    })
-  }
-
-  Modal.prototype.resetAdjustments = function () {
-    this.$element.css({
-      paddingLeft: '',
-      paddingRight: ''
-    })
-  }
-
-  Modal.prototype.checkScrollbar = function () {
-    var fullWindowWidth = window.innerWidth
-    if (!fullWindowWidth) { // workaround for missing window.innerWidth in IE8
-      var documentElementRect = document.documentElement.getBoundingClientRect()
-      fullWindowWidth = documentElementRect.right - Math.abs(documentElementRect.left)
-    }
-    this.bodyIsOverflowing = document.body.clientWidth < fullWindowWidth
-    this.scrollbarWidth = this.measureScrollbar()
-  }
-
-  Modal.prototype.setScrollbar = function () {
-    var bodyPad = parseInt((this.$body.css('padding-right') || 0), 10)
-    this.originalBodyPad = document.body.style.paddingRight || ''
-    if (this.bodyIsOverflowing) this.$body.css('padding-right', bodyPad + this.scrollbarWidth)
-  }
-
-  Modal.prototype.resetScrollbar = function () {
-    this.$body.css('padding-right', this.originalBodyPad)
-  }
-
-  Modal.prototype.measureScrollbar = function () { // thx walsh
-    var scrollDiv = document.createElement('div')
-    scrollDiv.className = 'modal-scrollbar-measure'
-    this.$body.append(scrollDiv)
-    var scrollbarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth
-    this.$body[0].removeChild(scrollDiv)
-    return scrollbarWidth
-  }
-
-
-  // MODAL PLUGIN DEFINITION
-  // =======================
-
-  function Plugin(option, _relatedTarget) {
-    return this.each(function () {
-      var $this   = $(this)
-      var data    = $this.data('bs.modal')
-      var options = $.extend({}, Modal.DEFAULTS, $this.data(), typeof option == 'object' && option)
-
-      if (!data) $this.data('bs.modal', (data = new Modal(this, options)))
-      if (typeof option == 'string') data[option](_relatedTarget)
-      else if (options.show) data.show(_relatedTarget)
-    })
-  }
-
-  var old = $.fn.modal
-
-  $.fn.modal             = Plugin
-  $.fn.modal.Constructor = Modal
-
-
-  // MODAL NO CONFLICT
-  // =================
-
-  $.fn.modal.noConflict = function () {
-    $.fn.modal = old
-    return this
-  }
-
-
-  // MODAL DATA-API
-  // ==============
-
-  $(document).on('click.bs.modal.data-api', '[data-toggle="modal"]', function (e) {
-    var $this   = $(this)
-    var href    = $this.attr('href')
-    var $target = $($this.attr('data-target') || (href && href.replace(/.*(?=#[^\s]+$)/, ''))) // strip for ie7
-    var option  = $target.data('bs.modal') ? 'toggle' : $.extend({ remote: !/#/.test(href) && href }, $target.data(), $this.data())
-
-    if ($this.is('a')) e.preventDefault()
-
-    $target.one('show.bs.modal', function (showEvent) {
-      if (showEvent.isDefaultPrevented()) return // only register focus restorer if modal will actually get shown
-      $target.one('hidden.bs.modal', function () {
-        $this.is(':visible') && $this.trigger('focus')
-      })
-    })
-    Plugin.call($target, option, this)
-  })
-
-}(jQuery);
-
-/* ========================================================================
- * Bootstrap: tooltip.js v3.3.7
- * http://getbootstrap.com/javascript/#tooltip
- * Inspired by the original jQuery.tipsy by Jason Frame
- * ========================================================================
- * Copyright 2011-2016 Twitter, Inc.
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
- * ======================================================================== */
-
-
-+function ($) {
-  'use strict';
-
-  // TOOLTIP PUBLIC CLASS DEFINITION
-  // ===============================
-
-  var Tooltip = function (element, options) {
-    this.type       = null
-    this.options    = null
-    this.enabled    = null
-    this.timeout    = null
-    this.hoverState = null
-    this.$element   = null
-    this.inState    = null
-
-    this.init('tooltip', element, options)
-  }
-
-  Tooltip.VERSION  = '3.3.7'
-
-  Tooltip.TRANSITION_DURATION = 150
-
-  Tooltip.DEFAULTS = {
-    animation: true,
-    placement: 'top',
-    selector: false,
-    template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>',
-    trigger: 'hover focus',
-    title: '',
-    delay: 0,
-    html: false,
-    container: false,
-    viewport: {
-      selector: 'body',
-      padding: 0
-    }
-  }
-
-  Tooltip.prototype.init = function (type, element, options) {
-    this.enabled   = true
-    this.type      = type
-    this.$element  = $(element)
-    this.options   = this.getOptions(options)
-    this.$viewport = this.options.viewport && $($.isFunction(this.options.viewport) ? this.options.viewport.call(this, this.$element) : (this.options.viewport.selector || this.options.viewport))
-    this.inState   = { click: false, hover: false, focus: false }
-
-    if (this.$element[0] instanceof document.constructor && !this.options.selector) {
-      throw new Error('`selector` option must be specified when initializing ' + this.type + ' on the window.document object!')
-    }
-
-    var triggers = this.options.trigger.split(' ')
-
-    for (var i = triggers.length; i--;) {
-      var trigger = triggers[i]
-
-      if (trigger == 'click') {
-        this.$element.on('click.' + this.type, this.options.selector, $.proxy(this.toggle, this))
-      } else if (trigger != 'manual') {
-        var eventIn  = trigger == 'hover' ? 'mouseenter' : 'focusin'
-        var eventOut = trigger == 'hover' ? 'mouseleave' : 'focusout'
-
-        this.$element.on(eventIn  + '.' + this.type, this.options.selector, $.proxy(this.enter, this))
-        this.$element.on(eventOut + '.' + this.type, this.options.selector, $.proxy(this.leave, this))
-      }
-    }
-
-    this.options.selector ?
-      (this._options = $.extend({}, this.options, { trigger: 'manual', selector: '' })) :
-      this.fixTitle()
-  }
-
-  Tooltip.prototype.getDefaults = function () {
-    return Tooltip.DEFAULTS
-  }
-
-  Tooltip.prototype.getOptions = function (options) {
-    options = $.extend({}, this.getDefaults(), this.$element.data(), options)
-
-    if (options.delay && typeof options.delay == 'number') {
-      options.delay = {
-        show: options.delay,
-        hide: options.delay
-      }
-    }
-
-    return options
-  }
-
-  Tooltip.prototype.getDelegateOptions = function () {
-    var options  = {}
-    var defaults = this.getDefaults()
-
-    this._options && $.each(this._options, function (key, value) {
-      if (defaults[key] != value) options[key] = value
-    })
-
-    return options
-  }
-
-  Tooltip.prototype.enter = function (obj) {
-    var self = obj instanceof this.constructor ?
-      obj : $(obj.currentTarget).data('bs.' + this.type)
-
-    if (!self) {
-      self = new this.constructor(obj.currentTarget, this.getDelegateOptions())
-      $(obj.currentTarget).data('bs.' + this.type, self)
-    }
-
-    if (obj instanceof $.Event) {
-      self.inState[obj.type == 'focusin' ? 'focus' : 'hover'] = true
-    }
-
-    if (self.tip().hasClass('in') || self.hoverState == 'in') {
-      self.hoverState = 'in'
-      return
-    }
-
-    clearTimeout(self.timeout)
-
-    self.hoverState = 'in'
-
-    if (!self.options.delay || !self.options.delay.show) return self.show()
-
-    self.timeout = setTimeout(function () {
-      if (self.hoverState == 'in') self.show()
-    }, self.options.delay.show)
-  }
-
-  Tooltip.prototype.isInStateTrue = function () {
-    for (var key in this.inState) {
-      if (this.inState[key]) return true
-    }
-
-    return false
-  }
-
-  Tooltip.prototype.leave = function (obj) {
-    var self = obj instanceof this.constructor ?
-      obj : $(obj.currentTarget).data('bs.' + this.type)
-
-    if (!self) {
-      self = new this.constructor(obj.currentTarget, this.getDelegateOptions())
-      $(obj.currentTarget).data('bs.' + this.type, self)
-    }
-
-    if (obj instanceof $.Event) {
-      self.inState[obj.type == 'focusout' ? 'focus' : 'hover'] = false
-    }
-
-    if (self.isInStateTrue()) return
-
-    clearTimeout(self.timeout)
-
-    self.hoverState = 'out'
-
-    if (!self.options.delay || !self.options.delay.hide) return self.hide()
-
-    self.timeout = setTimeout(function () {
-      if (self.hoverState == 'out') self.hide()
-    }, self.options.delay.hide)
-  }
-
-  Tooltip.prototype.show = function () {
-    var e = $.Event('show.bs.' + this.type)
-
-    if (this.hasContent() && this.enabled) {
-      this.$element.trigger(e)
-
-      var inDom = $.contains(this.$element[0].ownerDocument.documentElement, this.$element[0])
-      if (e.isDefaultPrevented() || !inDom) return
-      var that = this
-
-      var $tip = this.tip()
-
-      var tipId = this.getUID(this.type)
-
-      this.setContent()
-      $tip.attr('id', tipId)
-      this.$element.attr('aria-describedby', tipId)
-
-      if (this.options.animation) $tip.addClass('fade')
-
-      var placement = typeof this.options.placement == 'function' ?
-        this.options.placement.call(this, $tip[0], this.$element[0]) :
-        this.options.placement
-
-      var autoToken = /\s?auto?\s?/i
-      var autoPlace = autoToken.test(placement)
-      if (autoPlace) placement = placement.replace(autoToken, '') || 'top'
-
-      $tip
-        .detach()
-        .css({ top: 0, left: 0, display: 'block' })
-        .addClass(placement)
-        .data('bs.' + this.type, this)
-
-      this.options.container ? $tip.appendTo(this.options.container) : $tip.insertAfter(this.$element)
-      this.$element.trigger('inserted.bs.' + this.type)
-
-      var pos          = this.getPosition()
-      var actualWidth  = $tip[0].offsetWidth
-      var actualHeight = $tip[0].offsetHeight
-
-      if (autoPlace) {
-        var orgPlacement = placement
-        var viewportDim = this.getPosition(this.$viewport)
-
-        placement = placement == 'bottom' && pos.bottom + actualHeight > viewportDim.bottom ? 'top'    :
-                    placement == 'top'    && pos.top    - actualHeight < viewportDim.top    ? 'bottom' :
-                    placement == 'right'  && pos.right  + actualWidth  > viewportDim.width  ? 'left'   :
-                    placement == 'left'   && pos.left   - actualWidth  < viewportDim.left   ? 'right'  :
-                    placement
-
-        $tip
-          .removeClass(orgPlacement)
-          .addClass(placement)
-      }
-
-      var calculatedOffset = this.getCalculatedOffset(placement, pos, actualWidth, actualHeight)
-
-      this.applyPlacement(calculatedOffset, placement)
-
-      var complete = function () {
-        var prevHoverState = that.hoverState
-        that.$element.trigger('shown.bs.' + that.type)
-        that.hoverState = null
-
-        if (prevHoverState == 'out') that.leave(that)
-      }
-
-      $.support.transition && this.$tip.hasClass('fade') ?
-        $tip
-          .one('bsTransitionEnd', complete)
-          .emulateTransitionEnd(Tooltip.TRANSITION_DURATION) :
-        complete()
-    }
-  }
-
-  Tooltip.prototype.applyPlacement = function (offset, placement) {
-    var $tip   = this.tip()
-    var width  = $tip[0].offsetWidth
-    var height = $tip[0].offsetHeight
-
-    // manually read margins because getBoundingClientRect includes difference
-    var marginTop = parseInt($tip.css('margin-top'), 10)
-    var marginLeft = parseInt($tip.css('margin-left'), 10)
-
-    // we must check for NaN for ie 8/9
-    if (isNaN(marginTop))  marginTop  = 0
-    if (isNaN(marginLeft)) marginLeft = 0
-
-    offset.top  += marginTop
-    offset.left += marginLeft
-
-    // $.fn.offset doesn't round pixel values
-    // so we use setOffset directly with our own function B-0
-    $.offset.setOffset($tip[0], $.extend({
-      using: function (props) {
-        $tip.css({
-          top: Math.round(props.top),
-          left: Math.round(props.left)
-        })
-      }
-    }, offset), 0)
-
-    $tip.addClass('in')
-
-    // check to see if placing tip in new offset caused the tip to resize itself
-    var actualWidth  = $tip[0].offsetWidth
-    var actualHeight = $tip[0].offsetHeight
-
-    if (placement == 'top' && actualHeight != height) {
-      offset.top = offset.top + height - actualHeight
-    }
-
-    var delta = this.getViewportAdjustedDelta(placement, offset, actualWidth, actualHeight)
-
-    if (delta.left) offset.left += delta.left
-    else offset.top += delta.top
-
-    var isVertical          = /top|bottom/.test(placement)
-    var arrowDelta          = isVertical ? delta.left * 2 - width + actualWidth : delta.top * 2 - height + actualHeight
-    var arrowOffsetPosition = isVertical ? 'offsetWidth' : 'offsetHeight'
-
-    $tip.offset(offset)
-    this.replaceArrow(arrowDelta, $tip[0][arrowOffsetPosition], isVertical)
-  }
-
-  Tooltip.prototype.replaceArrow = function (delta, dimension, isVertical) {
-    this.arrow()
-      .css(isVertical ? 'left' : 'top', 50 * (1 - delta / dimension) + '%')
-      .css(isVertical ? 'top' : 'left', '')
-  }
-
-  Tooltip.prototype.setContent = function () {
-    var $tip  = this.tip()
-    var title = this.getTitle()
-
-    $tip.find('.tooltip-inner')[this.options.html ? 'html' : 'text'](title)
-    $tip.removeClass('fade in top bottom left right')
-  }
-
-  Tooltip.prototype.hide = function (callback) {
-    var that = this
-    var $tip = $(this.$tip)
-    var e    = $.Event('hide.bs.' + this.type)
-
-    function complete() {
-      if (that.hoverState != 'in') $tip.detach()
-      if (that.$element) { // TODO: Check whether guarding this code with this `if` is really necessary.
-        that.$element
-          .removeAttr('aria-describedby')
-          .trigger('hidden.bs.' + that.type)
-      }
-      callback && callback()
-    }
-
-    this.$element.trigger(e)
-
-    if (e.isDefaultPrevented()) return
-
-    $tip.removeClass('in')
-
-    $.support.transition && $tip.hasClass('fade') ?
-      $tip
-        .one('bsTransitionEnd', complete)
-        .emulateTransitionEnd(Tooltip.TRANSITION_DURATION) :
-      complete()
-
-    this.hoverState = null
-
-    return this
-  }
-
-  Tooltip.prototype.fixTitle = function () {
-    var $e = this.$element
-    if ($e.attr('title') || typeof $e.attr('data-original-title') != 'string') {
-      $e.attr('data-original-title', $e.attr('title') || '').attr('title', '')
-    }
-  }
-
-  Tooltip.prototype.hasContent = function () {
-    return this.getTitle()
-  }
-
-  Tooltip.prototype.getPosition = function ($element) {
-    $element   = $element || this.$element
-
-    var el     = $element[0]
-    var isBody = el.tagName == 'BODY'
-
-    var elRect    = el.getBoundingClientRect()
-    if (elRect.width == null) {
-      // width and height are missing in IE8, so compute them manually; see https://github.com/twbs/bootstrap/issues/14093
-      elRect = $.extend({}, elRect, { width: elRect.right - elRect.left, height: elRect.bottom - elRect.top })
-    }
-    var isSvg = window.SVGElement && el instanceof window.SVGElement
-    // Avoid using $.offset() on SVGs since it gives incorrect results in jQuery 3.
-    // See https://github.com/twbs/bootstrap/issues/20280
-    var elOffset  = isBody ? { top: 0, left: 0 } : (isSvg ? null : $element.offset())
-    var scroll    = { scroll: isBody ? document.documentElement.scrollTop || document.body.scrollTop : $element.scrollTop() }
-    var outerDims = isBody ? { width: $(window).width(), height: $(window).height() } : null
-
-    return $.extend({}, elRect, scroll, outerDims, elOffset)
-  }
-
-  Tooltip.prototype.getCalculatedOffset = function (placement, pos, actualWidth, actualHeight) {
-    return placement == 'bottom' ? { top: pos.top + pos.height,   left: pos.left + pos.width / 2 - actualWidth / 2 } :
-           placement == 'top'    ? { top: pos.top - actualHeight, left: pos.left + pos.width / 2 - actualWidth / 2 } :
-           placement == 'left'   ? { top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left - actualWidth } :
-        /* placement == 'right' */ { top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left + pos.width }
-
-  }
-
-  Tooltip.prototype.getViewportAdjustedDelta = function (placement, pos, actualWidth, actualHeight) {
-    var delta = { top: 0, left: 0 }
-    if (!this.$viewport) return delta
-
-    var viewportPadding = this.options.viewport && this.options.viewport.padding || 0
-    var viewportDimensions = this.getPosition(this.$viewport)
-
-    if (/right|left/.test(placement)) {
-      var topEdgeOffset    = pos.top - viewportPadding - viewportDimensions.scroll
-      var bottomEdgeOffset = pos.top + viewportPadding - viewportDimensions.scroll + actualHeight
-      if (topEdgeOffset < viewportDimensions.top) { // top overflow
-        delta.top = viewportDimensions.top - topEdgeOffset
-      } else if (bottomEdgeOffset > viewportDimensions.top + viewportDimensions.height) { // bottom overflow
-        delta.top = viewportDimensions.top + viewportDimensions.height - bottomEdgeOffset
-      }
-    } else {
-      var leftEdgeOffset  = pos.left - viewportPadding
-      var rightEdgeOffset = pos.left + viewportPadding + actualWidth
-      if (leftEdgeOffset < viewportDimensions.left) { // left overflow
-        delta.left = viewportDimensions.left - leftEdgeOffset
-      } else if (rightEdgeOffset > viewportDimensions.right) { // right overflow
-        delta.left = viewportDimensions.left + viewportDimensions.width - rightEdgeOffset
-      }
-    }
-
-    return delta
-  }
-
-  Tooltip.prototype.getTitle = function () {
-    var title
-    var $e = this.$element
-    var o  = this.options
-
-    title = $e.attr('data-original-title')
-      || (typeof o.title == 'function' ? o.title.call($e[0]) :  o.title)
-
-    return title
-  }
-
-  Tooltip.prototype.getUID = function (prefix) {
-    do prefix += ~~(Math.random() * 1000000)
-    while (document.getElementById(prefix))
-    return prefix
-  }
-
-  Tooltip.prototype.tip = function () {
-    if (!this.$tip) {
-      this.$tip = $(this.options.template)
-      if (this.$tip.length != 1) {
-        throw new Error(this.type + ' `template` option must consist of exactly 1 top-level element!')
-      }
-    }
-    return this.$tip
-  }
-
-  Tooltip.prototype.arrow = function () {
-    return (this.$arrow = this.$arrow || this.tip().find('.tooltip-arrow'))
-  }
-
-  Tooltip.prototype.enable = function () {
-    this.enabled = true
-  }
-
-  Tooltip.prototype.disable = function () {
-    this.enabled = false
-  }
-
-  Tooltip.prototype.toggleEnabled = function () {
-    this.enabled = !this.enabled
-  }
-
-  Tooltip.prototype.toggle = function (e) {
-    var self = this
-    if (e) {
-      self = $(e.currentTarget).data('bs.' + this.type)
-      if (!self) {
-        self = new this.constructor(e.currentTarget, this.getDelegateOptions())
-        $(e.currentTarget).data('bs.' + this.type, self)
-      }
-    }
-
-    if (e) {
-      self.inState.click = !self.inState.click
-      if (self.isInStateTrue()) self.enter(self)
-      else self.leave(self)
-    } else {
-      self.tip().hasClass('in') ? self.leave(self) : self.enter(self)
-    }
-  }
-
-  Tooltip.prototype.destroy = function () {
-    var that = this
-    clearTimeout(this.timeout)
-    this.hide(function () {
-      that.$element.off('.' + that.type).removeData('bs.' + that.type)
-      if (that.$tip) {
-        that.$tip.detach()
-      }
-      that.$tip = null
-      that.$arrow = null
-      that.$viewport = null
-      that.$element = null
-    })
-  }
-
-
-  // TOOLTIP PLUGIN DEFINITION
-  // =========================
-
-  function Plugin(option) {
-    return this.each(function () {
-      var $this   = $(this)
-      var data    = $this.data('bs.tooltip')
-      var options = typeof option == 'object' && option
-
-      if (!data && /destroy|hide/.test(option)) return
-      if (!data) $this.data('bs.tooltip', (data = new Tooltip(this, options)))
-      if (typeof option == 'string') data[option]()
-    })
-  }
-
-  var old = $.fn.tooltip
-
-  $.fn.tooltip             = Plugin
-  $.fn.tooltip.Constructor = Tooltip
-
-
-  // TOOLTIP NO CONFLICT
-  // ===================
-
-  $.fn.tooltip.noConflict = function () {
-    $.fn.tooltip = old
-    return this
-  }
-
-}(jQuery);
-
-/* ========================================================================
- * Bootstrap: popover.js v3.3.7
- * http://getbootstrap.com/javascript/#popovers
- * ========================================================================
- * Copyright 2011-2016 Twitter, Inc.
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
- * ======================================================================== */
-
-
-+function ($) {
-  'use strict';
-
-  // POPOVER PUBLIC CLASS DEFINITION
-  // ===============================
-
-  var Popover = function (element, options) {
-    this.init('popover', element, options)
-  }
-
-  if (!$.fn.tooltip) throw new Error('Popover requires tooltip.js')
-
-  Popover.VERSION  = '3.3.7'
-
-  Popover.DEFAULTS = $.extend({}, $.fn.tooltip.Constructor.DEFAULTS, {
-    placement: 'right',
-    trigger: 'click',
-    content: '',
-    template: '<div class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'
-  })
-
-
-  // NOTE: POPOVER EXTENDS tooltip.js
-  // ================================
-
-  Popover.prototype = $.extend({}, $.fn.tooltip.Constructor.prototype)
-
-  Popover.prototype.constructor = Popover
-
-  Popover.prototype.getDefaults = function () {
-    return Popover.DEFAULTS
-  }
-
-  Popover.prototype.setContent = function () {
-    var $tip    = this.tip()
-    var title   = this.getTitle()
-    var content = this.getContent()
-
-    $tip.find('.popover-title')[this.options.html ? 'html' : 'text'](title)
-    $tip.find('.popover-content').children().detach().end()[ // we use append for html objects to maintain js events
-      this.options.html ? (typeof content == 'string' ? 'html' : 'append') : 'text'
-    ](content)
-
-    $tip.removeClass('fade top bottom left right in')
-
-    // IE8 doesn't accept hiding via the `:empty` pseudo selector, we have to do
-    // this manually by checking the contents.
-    if (!$tip.find('.popover-title').html()) $tip.find('.popover-title').hide()
-  }
-
-  Popover.prototype.hasContent = function () {
-    return this.getTitle() || this.getContent()
-  }
-
-  Popover.prototype.getContent = function () {
-    var $e = this.$element
-    var o  = this.options
-
-    return $e.attr('data-content')
-      || (typeof o.content == 'function' ?
-            o.content.call($e[0]) :
-            o.content)
-  }
-
-  Popover.prototype.arrow = function () {
-    return (this.$arrow = this.$arrow || this.tip().find('.arrow'))
-  }
-
-
-  // POPOVER PLUGIN DEFINITION
-  // =========================
-
-  function Plugin(option) {
-    return this.each(function () {
-      var $this   = $(this)
-      var data    = $this.data('bs.popover')
-      var options = typeof option == 'object' && option
-
-      if (!data && /destroy|hide/.test(option)) return
-      if (!data) $this.data('bs.popover', (data = new Popover(this, options)))
-      if (typeof option == 'string') data[option]()
-    })
-  }
-
-  var old = $.fn.popover
-
-  $.fn.popover             = Plugin
-  $.fn.popover.Constructor = Popover
-
-
-  // POPOVER NO CONFLICT
-  // ===================
-
-  $.fn.popover.noConflict = function () {
-    $.fn.popover = old
-    return this
-  }
-
-}(jQuery);
-
-/* ========================================================================
- * Bootstrap: scrollspy.js v3.3.7
- * http://getbootstrap.com/javascript/#scrollspy
- * ========================================================================
- * Copyright 2011-2016 Twitter, Inc.
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
- * ======================================================================== */
-
-
-+function ($) {
-  'use strict';
-
-  // SCROLLSPY CLASS DEFINITION
-  // ==========================
-
-  function ScrollSpy(element, options) {
-    this.$body          = $(document.body)
-    this.$scrollElement = $(element).is(document.body) ? $(window) : $(element)
-    this.options        = $.extend({}, ScrollSpy.DEFAULTS, options)
-    this.selector       = (this.options.target || '') + ' .nav li > a'
-    this.offsets        = []
-    this.targets        = []
-    this.activeTarget   = null
-    this.scrollHeight   = 0
-
-    this.$scrollElement.on('scroll.bs.scrollspy', $.proxy(this.process, this))
-    this.refresh()
-    this.process()
-  }
-
-  ScrollSpy.VERSION  = '3.3.7'
-
-  ScrollSpy.DEFAULTS = {
-    offset: 10
-  }
-
-  ScrollSpy.prototype.getScrollHeight = function () {
-    return this.$scrollElement[0].scrollHeight || Math.max(this.$body[0].scrollHeight, document.documentElement.scrollHeight)
-  }
-
-  ScrollSpy.prototype.refresh = function () {
-    var that          = this
-    var offsetMethod  = 'offset'
-    var offsetBase    = 0
-
-    this.offsets      = []
-    this.targets      = []
-    this.scrollHeight = this.getScrollHeight()
-
-    if (!$.isWindow(this.$scrollElement[0])) {
-      offsetMethod = 'position'
-      offsetBase   = this.$scrollElement.scrollTop()
-    }
-
-    this.$body
-      .find(this.selector)
-      .map(function () {
-        var $el   = $(this)
-        var href  = $el.data('target') || $el.attr('href')
-        var $href = /^#./.test(href) && $(href)
-
-        return ($href
-          && $href.length
-          && $href.is(':visible')
-          && [[$href[offsetMethod]().top + offsetBase, href]]) || null
-      })
-      .sort(function (a, b) { return a[0] - b[0] })
-      .each(function () {
-        that.offsets.push(this[0])
-        that.targets.push(this[1])
-      })
-  }
-
-  ScrollSpy.prototype.process = function () {
-    var scrollTop    = this.$scrollElement.scrollTop() + this.options.offset
-    var scrollHeight = this.getScrollHeight()
-    var maxScroll    = this.options.offset + scrollHeight - this.$scrollElement.height()
-    var offsets      = this.offsets
-    var targets      = this.targets
-    var activeTarget = this.activeTarget
-    var i
-
-    if (this.scrollHeight != scrollHeight) {
-      this.refresh()
-    }
-
-    if (scrollTop >= maxScroll) {
-      return activeTarget != (i = targets[targets.length - 1]) && this.activate(i)
-    }
-
-    if (activeTarget && scrollTop < offsets[0]) {
-      this.activeTarget = null
-      return this.clear()
-    }
-
-    for (i = offsets.length; i--;) {
-      activeTarget != targets[i]
-        && scrollTop >= offsets[i]
-        && (offsets[i + 1] === undefined || scrollTop < offsets[i + 1])
-        && this.activate(targets[i])
-    }
-  }
-
-  ScrollSpy.prototype.activate = function (target) {
-    this.activeTarget = target
-
-    this.clear()
-
-    var selector = this.selector +
-      '[data-target="' + target + '"],' +
-      this.selector + '[href="' + target + '"]'
-
-    var active = $(selector)
-      .parents('li')
-      .addClass('active')
-
-    if (active.parent('.dropdown-menu').length) {
-      active = active
-        .closest('li.dropdown')
-        .addClass('active')
-    }
-
-    active.trigger('activate.bs.scrollspy')
-  }
-
-  ScrollSpy.prototype.clear = function () {
-    $(this.selector)
-      .parentsUntil(this.options.target, '.active')
-      .removeClass('active')
-  }
-
-
-  // SCROLLSPY PLUGIN DEFINITION
-  // ===========================
-
-  function Plugin(option) {
-    return this.each(function () {
-      var $this   = $(this)
-      var data    = $this.data('bs.scrollspy')
-      var options = typeof option == 'object' && option
-
-      if (!data) $this.data('bs.scrollspy', (data = new ScrollSpy(this, options)))
-      if (typeof option == 'string') data[option]()
-    })
-  }
-
-  var old = $.fn.scrollspy
-
-  $.fn.scrollspy             = Plugin
-  $.fn.scrollspy.Constructor = ScrollSpy
-
-
-  // SCROLLSPY NO CONFLICT
-  // =====================
-
-  $.fn.scrollspy.noConflict = function () {
-    $.fn.scrollspy = old
-    return this
-  }
-
-
-  // SCROLLSPY DATA-API
-  // ==================
-
-  $(window).on('load.bs.scrollspy.data-api', function () {
-    $('[data-spy="scroll"]').each(function () {
-      var $spy = $(this)
-      Plugin.call($spy, $spy.data())
-    })
-  })
-
-}(jQuery);
-
-/* ========================================================================
- * Bootstrap: tab.js v3.3.7
- * http://getbootstrap.com/javascript/#tabs
- * ========================================================================
- * Copyright 2011-2016 Twitter, Inc.
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
- * ======================================================================== */
-
-
-+function ($) {
-  'use strict';
-
-  // TAB CLASS DEFINITION
-  // ====================
-
-  var Tab = function (element) {
-    // jscs:disable requireDollarBeforejQueryAssignment
-    this.element = $(element)
-    // jscs:enable requireDollarBeforejQueryAssignment
-  }
-
-  Tab.VERSION = '3.3.7'
-
-  Tab.TRANSITION_DURATION = 150
-
-  Tab.prototype.show = function () {
-    var $this    = this.element
-    var $ul      = $this.closest('ul:not(.dropdown-menu)')
-    var selector = $this.data('target')
-
-    if (!selector) {
-      selector = $this.attr('href')
-      selector = selector && selector.replace(/.*(?=#[^\s]*$)/, '') // strip for ie7
-    }
-
-    if ($this.parent('li').hasClass('active')) return
-
-    var $previous = $ul.find('.active:last a')
-    var hideEvent = $.Event('hide.bs.tab', {
-      relatedTarget: $this[0]
-    })
-    var showEvent = $.Event('show.bs.tab', {
-      relatedTarget: $previous[0]
-    })
-
-    $previous.trigger(hideEvent)
-    $this.trigger(showEvent)
-
-    if (showEvent.isDefaultPrevented() || hideEvent.isDefaultPrevented()) return
-
-    var $target = $(selector)
-
-    this.activate($this.closest('li'), $ul)
-    this.activate($target, $target.parent(), function () {
-      $previous.trigger({
-        type: 'hidden.bs.tab',
-        relatedTarget: $this[0]
-      })
-      $this.trigger({
-        type: 'shown.bs.tab',
-        relatedTarget: $previous[0]
-      })
-    })
-  }
-
-  Tab.prototype.activate = function (element, container, callback) {
-    var $active    = container.find('> .active')
-    var transition = callback
-      && $.support.transition
-      && ($active.length && $active.hasClass('fade') || !!container.find('> .fade').length)
-
-    function next() {
-      $active
-        .removeClass('active')
-        .find('> .dropdown-menu > .active')
-          .removeClass('active')
-        .end()
-        .find('[data-toggle="tab"]')
-          .attr('aria-expanded', false)
-
-      element
-        .addClass('active')
-        .find('[data-toggle="tab"]')
-          .attr('aria-expanded', true)
-
-      if (transition) {
-        element[0].offsetWidth // reflow for transition
-        element.addClass('in')
-      } else {
-        element.removeClass('fade')
-      }
-
-      if (element.parent('.dropdown-menu').length) {
-        element
-          .closest('li.dropdown')
-            .addClass('active')
-          .end()
-          .find('[data-toggle="tab"]')
-            .attr('aria-expanded', true)
-      }
-
-      callback && callback()
-    }
-
-    $active.length && transition ?
-      $active
-        .one('bsTransitionEnd', next)
-        .emulateTransitionEnd(Tab.TRANSITION_DURATION) :
-      next()
-
-    $active.removeClass('in')
-  }
-
-
-  // TAB PLUGIN DEFINITION
-  // =====================
-
-  function Plugin(option) {
-    return this.each(function () {
-      var $this = $(this)
-      var data  = $this.data('bs.tab')
-
-      if (!data) $this.data('bs.tab', (data = new Tab(this)))
-      if (typeof option == 'string') data[option]()
-    })
-  }
-
-  var old = $.fn.tab
-
-  $.fn.tab             = Plugin
-  $.fn.tab.Constructor = Tab
-
-
-  // TAB NO CONFLICT
-  // ===============
-
-  $.fn.tab.noConflict = function () {
-    $.fn.tab = old
-    return this
-  }
-
-
-  // TAB DATA-API
-  // ============
-
-  var clickHandler = function (e) {
-    e.preventDefault()
-    Plugin.call($(this), 'show')
-  }
-
-  $(document)
-    .on('click.bs.tab.data-api', '[data-toggle="tab"]', clickHandler)
-    .on('click.bs.tab.data-api', '[data-toggle="pill"]', clickHandler)
-
-}(jQuery);
-
-/* ========================================================================
- * Bootstrap: affix.js v3.3.7
- * http://getbootstrap.com/javascript/#affix
- * ========================================================================
- * Copyright 2011-2016 Twitter, Inc.
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
- * ======================================================================== */
-
-
-+function ($) {
-  'use strict';
-
-  // AFFIX CLASS DEFINITION
-  // ======================
-
-  var Affix = function (element, options) {
-    this.options = $.extend({}, Affix.DEFAULTS, options)
-
-    this.$target = $(this.options.target)
-      .on('scroll.bs.affix.data-api', $.proxy(this.checkPosition, this))
-      .on('click.bs.affix.data-api',  $.proxy(this.checkPositionWithEventLoop, this))
-
-    this.$element     = $(element)
-    this.affixed      = null
-    this.unpin        = null
-    this.pinnedOffset = null
-
-    this.checkPosition()
-  }
-
-  Affix.VERSION  = '3.3.7'
-
-  Affix.RESET    = 'affix affix-top affix-bottom'
-
-  Affix.DEFAULTS = {
-    offset: 0,
-    target: window
-  }
-
-  Affix.prototype.getState = function (scrollHeight, height, offsetTop, offsetBottom) {
-    var scrollTop    = this.$target.scrollTop()
-    var position     = this.$element.offset()
-    var targetHeight = this.$target.height()
-
-    if (offsetTop != null && this.affixed == 'top') return scrollTop < offsetTop ? 'top' : false
-
-    if (this.affixed == 'bottom') {
-      if (offsetTop != null) return (scrollTop + this.unpin <= position.top) ? false : 'bottom'
-      return (scrollTop + targetHeight <= scrollHeight - offsetBottom) ? false : 'bottom'
-    }
-
-    var initializing   = this.affixed == null
-    var colliderTop    = initializing ? scrollTop : position.top
-    var colliderHeight = initializing ? targetHeight : height
-
-    if (offsetTop != null && scrollTop <= offsetTop) return 'top'
-    if (offsetBottom != null && (colliderTop + colliderHeight >= scrollHeight - offsetBottom)) return 'bottom'
-
-    return false
-  }
-
-  Affix.prototype.getPinnedOffset = function () {
-    if (this.pinnedOffset) return this.pinnedOffset
-    this.$element.removeClass(Affix.RESET).addClass('affix')
-    var scrollTop = this.$target.scrollTop()
-    var position  = this.$element.offset()
-    return (this.pinnedOffset = position.top - scrollTop)
-  }
-
-  Affix.prototype.checkPositionWithEventLoop = function () {
-    setTimeout($.proxy(this.checkPosition, this), 1)
-  }
-
-  Affix.prototype.checkPosition = function () {
-    if (!this.$element.is(':visible')) return
-
-    var height       = this.$element.height()
-    var offset       = this.options.offset
-    var offsetTop    = offset.top
-    var offsetBottom = offset.bottom
-    var scrollHeight = Math.max($(document).height(), $(document.body).height())
-
-    if (typeof offset != 'object')         offsetBottom = offsetTop = offset
-    if (typeof offsetTop == 'function')    offsetTop    = offset.top(this.$element)
-    if (typeof offsetBottom == 'function') offsetBottom = offset.bottom(this.$element)
-
-    var affix = this.getState(scrollHeight, height, offsetTop, offsetBottom)
-
-    if (this.affixed != affix) {
-      if (this.unpin != null) this.$element.css('top', '')
-
-      var affixType = 'affix' + (affix ? '-' + affix : '')
-      var e         = $.Event(affixType + '.bs.affix')
-
-      this.$element.trigger(e)
-
-      if (e.isDefaultPrevented()) return
-
-      this.affixed = affix
-      this.unpin = affix == 'bottom' ? this.getPinnedOffset() : null
-
-      this.$element
-        .removeClass(Affix.RESET)
-        .addClass(affixType)
-        .trigger(affixType.replace('affix', 'affixed') + '.bs.affix')
-    }
-
-    if (affix == 'bottom') {
-      this.$element.offset({
-        top: scrollHeight - height - offsetBottom
-      })
-    }
-  }
-
-
-  // AFFIX PLUGIN DEFINITION
-  // =======================
-
-  function Plugin(option) {
-    return this.each(function () {
-      var $this   = $(this)
-      var data    = $this.data('bs.affix')
-      var options = typeof option == 'object' && option
-
-      if (!data) $this.data('bs.affix', (data = new Affix(this, options)))
-      if (typeof option == 'string') data[option]()
-    })
-  }
-
-  var old = $.fn.affix
-
-  $.fn.affix             = Plugin
-  $.fn.affix.Constructor = Affix
-
-
-  // AFFIX NO CONFLICT
-  // =================
-
-  $.fn.affix.noConflict = function () {
-    $.fn.affix = old
-    return this
-  }
-
-
-  // AFFIX DATA-API
-  // ==============
-
-  $(window).on('load', function () {
-    $('[data-spy="affix"]').each(function () {
-      var $spy = $(this)
-      var data = $spy.data()
-
-      data.offset = data.offset || {}
-
-      if (data.offsetBottom != null) data.offset.bottom = data.offsetBottom
-      if (data.offsetTop    != null) data.offset.top    = data.offsetTop
-
-      Plugin.call($spy, data)
-    })
-  })
-
-}(jQuery);
-
-
-/***/ }),
-/* 15 */
+/* 18 */,
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(16);
+"use strict";
+
+
+var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+// SweetAlert
+// 2014-2015 (c) - Tristan Edwards
+// github.com/t4t5/sweetalert
+
+/*
+ * jQuery-like functions for manipulating the DOM
+ */
+
+var _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation = __webpack_require__(1);
+
+/*
+ * Handy utilities
+ */
+
+var _extend$hexToRgb$isIE8$logStr$colorLuminance = __webpack_require__(2);
+
+/*
+ *  Handle sweetAlert's DOM elements
+ */
+
+var _sweetAlertInitialize$getModal$getOverlay$getInput$setFocusStyle$openModal$resetInput$fixVerticalPosition = __webpack_require__(3);
+
+// Handle button events and keyboard events
+
+var _handleButton$handleConfirm$handleCancel = __webpack_require__(21);
+
+var _handleKeyDown = __webpack_require__(22);
+
+var _handleKeyDown2 = _interopRequireWildcard(_handleKeyDown);
+
+// Default values
+
+var _defaultParams = __webpack_require__(6);
+
+var _defaultParams2 = _interopRequireWildcard(_defaultParams);
+
+var _setParameters = __webpack_require__(23);
+
+var _setParameters2 = _interopRequireWildcard(_setParameters);
+
+/*
+ * Remember state in cases where opening and handling a modal will fiddle with it.
+ * (We also use window.previousActiveElement as a global variable)
+ */
+var previousWindowKeyDown;
+var lastFocusedButton;
+
+/*
+ * Global sweetAlert function
+ * (this is what the user calls)
+ */
+var sweetAlert, swal;
+
+exports['default'] = sweetAlert = swal = function () {
+  var customizations = arguments[0];
+
+  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.addClass(document.body, 'stop-scrolling');
+  _sweetAlertInitialize$getModal$getOverlay$getInput$setFocusStyle$openModal$resetInput$fixVerticalPosition.resetInput();
+
+  /*
+   * Use argument if defined or default value from params object otherwise.
+   * Supports the case where a default value is boolean true and should be
+   * overridden by a corresponding explicit argument which is boolean false.
+   */
+  function argumentOrDefault(key) {
+    var args = customizations;
+    return args[key] === undefined ? _defaultParams2['default'][key] : args[key];
+  }
+
+  if (customizations === undefined) {
+    _extend$hexToRgb$isIE8$logStr$colorLuminance.logStr('SweetAlert expects at least 1 attribute!');
+    return false;
+  }
+
+  var params = _extend$hexToRgb$isIE8$logStr$colorLuminance.extend({}, _defaultParams2['default']);
+
+  switch (typeof customizations) {
+
+    // Ex: swal("Hello", "Just testing", "info");
+    case 'string':
+      params.title = customizations;
+      params.text = arguments[1] || '';
+      params.type = arguments[2] || '';
+      break;
+
+    // Ex: swal({ title:"Hello", text: "Just testing", type: "info" });
+    case 'object':
+      if (customizations.title === undefined) {
+        _extend$hexToRgb$isIE8$logStr$colorLuminance.logStr('Missing "title" argument!');
+        return false;
+      }
+
+      params.title = customizations.title;
+
+      for (var customName in _defaultParams2['default']) {
+        params[customName] = argumentOrDefault(customName);
+      }
+
+      // Show "Confirm" instead of "OK" if cancel button is visible
+      params.confirmButtonText = params.showCancelButton ? 'Confirm' : _defaultParams2['default'].confirmButtonText;
+      params.confirmButtonText = argumentOrDefault('confirmButtonText');
+
+      // Callback function when clicking on "OK"/"Cancel"
+      params.doneFunction = arguments[1] || null;
+
+      break;
+
+    default:
+      _extend$hexToRgb$isIE8$logStr$colorLuminance.logStr('Unexpected type of argument! Expected "string" or "object", got ' + typeof customizations);
+      return false;
+
+  }
+
+  _setParameters2['default'](params);
+  _sweetAlertInitialize$getModal$getOverlay$getInput$setFocusStyle$openModal$resetInput$fixVerticalPosition.fixVerticalPosition();
+  _sweetAlertInitialize$getModal$getOverlay$getInput$setFocusStyle$openModal$resetInput$fixVerticalPosition.openModal(arguments[1]);
+
+  // Modal interactions
+  var modal = _sweetAlertInitialize$getModal$getOverlay$getInput$setFocusStyle$openModal$resetInput$fixVerticalPosition.getModal();
+
+  /*
+   * Make sure all modal buttons respond to all events
+   */
+  var $buttons = modal.querySelectorAll('button');
+  var buttonEvents = ['onclick', 'onmouseover', 'onmouseout', 'onmousedown', 'onmouseup', 'onfocus'];
+  var onButtonEvent = function onButtonEvent(e) {
+    return _handleButton$handleConfirm$handleCancel.handleButton(e, params, modal);
+  };
+
+  for (var btnIndex = 0; btnIndex < $buttons.length; btnIndex++) {
+    for (var evtIndex = 0; evtIndex < buttonEvents.length; evtIndex++) {
+      var btnEvt = buttonEvents[evtIndex];
+      $buttons[btnIndex][btnEvt] = onButtonEvent;
+    }
+  }
+
+  // Clicking outside the modal dismisses it (if allowed by user)
+  _sweetAlertInitialize$getModal$getOverlay$getInput$setFocusStyle$openModal$resetInput$fixVerticalPosition.getOverlay().onclick = onButtonEvent;
+
+  previousWindowKeyDown = window.onkeydown;
+
+  var onKeyEvent = function onKeyEvent(e) {
+    return _handleKeyDown2['default'](e, params, modal);
+  };
+  window.onkeydown = onKeyEvent;
+
+  window.onfocus = function () {
+    // When the user has focused away and focused back from the whole window.
+    setTimeout(function () {
+      // Put in a timeout to jump out of the event sequence.
+      // Calling focus() in the event sequence confuses things.
+      if (lastFocusedButton !== undefined) {
+        lastFocusedButton.focus();
+        lastFocusedButton = undefined;
+      }
+    }, 0);
+  };
+
+  // Show alert with enabled buttons always
+  swal.enableButtons();
+};
+
+/*
+ * Set default params for each popup
+ * @param {Object} userParams
+ */
+sweetAlert.setDefaults = swal.setDefaults = function (userParams) {
+  if (!userParams) {
+    throw new Error('userParams is required');
+  }
+  if (typeof userParams !== 'object') {
+    throw new Error('userParams has to be a object');
+  }
+
+  _extend$hexToRgb$isIE8$logStr$colorLuminance.extend(_defaultParams2['default'], userParams);
+};
+
+/*
+ * Animation when closing modal
+ */
+sweetAlert.close = swal.close = function () {
+  var modal = _sweetAlertInitialize$getModal$getOverlay$getInput$setFocusStyle$openModal$resetInput$fixVerticalPosition.getModal();
+
+  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.fadeOut(_sweetAlertInitialize$getModal$getOverlay$getInput$setFocusStyle$openModal$resetInput$fixVerticalPosition.getOverlay(), 5);
+  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.fadeOut(modal, 5);
+  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass(modal, 'showSweetAlert');
+  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.addClass(modal, 'hideSweetAlert');
+  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass(modal, 'visible');
+
+  /*
+   * Reset icon animations
+   */
+  var $successIcon = modal.querySelector('.sa-icon.sa-success');
+  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass($successIcon, 'animate');
+  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass($successIcon.querySelector('.sa-tip'), 'animateSuccessTip');
+  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass($successIcon.querySelector('.sa-long'), 'animateSuccessLong');
+
+  var $errorIcon = modal.querySelector('.sa-icon.sa-error');
+  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass($errorIcon, 'animateErrorIcon');
+  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass($errorIcon.querySelector('.sa-x-mark'), 'animateXMark');
+
+  var $warningIcon = modal.querySelector('.sa-icon.sa-warning');
+  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass($warningIcon, 'pulseWarning');
+  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass($warningIcon.querySelector('.sa-body'), 'pulseWarningIns');
+  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass($warningIcon.querySelector('.sa-dot'), 'pulseWarningIns');
+
+  // Reset custom class (delay so that UI changes aren't visible)
+  setTimeout(function () {
+    var customClass = modal.getAttribute('data-custom-class');
+    _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass(modal, customClass);
+  }, 300);
+
+  // Make page scrollable again
+  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass(document.body, 'stop-scrolling');
+
+  // Reset the page to its previous state
+  window.onkeydown = previousWindowKeyDown;
+  if (window.previousActiveElement) {
+    window.previousActiveElement.focus();
+  }
+  lastFocusedButton = undefined;
+  clearTimeout(modal.timeout);
+
+  return true;
+};
+
+/*
+ * Validation of the input field is done by user
+ * If something is wrong => call showInputError with errorMessage
+ */
+sweetAlert.showInputError = swal.showInputError = function (errorMessage) {
+  var modal = _sweetAlertInitialize$getModal$getOverlay$getInput$setFocusStyle$openModal$resetInput$fixVerticalPosition.getModal();
+
+  var $errorIcon = modal.querySelector('.sa-input-error');
+  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.addClass($errorIcon, 'show');
+
+  var $errorContainer = modal.querySelector('.sa-error-container');
+  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.addClass($errorContainer, 'show');
+
+  $errorContainer.querySelector('p').innerHTML = errorMessage;
+
+  setTimeout(function () {
+    sweetAlert.enableButtons();
+  }, 1);
+
+  modal.querySelector('input').focus();
+};
+
+/*
+ * Reset input error DOM elements
+ */
+sweetAlert.resetInputError = swal.resetInputError = function (event) {
+  // If press enter => ignore
+  if (event && event.keyCode === 13) {
+    return false;
+  }
+
+  var $modal = _sweetAlertInitialize$getModal$getOverlay$getInput$setFocusStyle$openModal$resetInput$fixVerticalPosition.getModal();
+
+  var $errorIcon = $modal.querySelector('.sa-input-error');
+  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass($errorIcon, 'show');
+
+  var $errorContainer = $modal.querySelector('.sa-error-container');
+  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass($errorContainer, 'show');
+};
+
+/*
+ * Disable confirm and cancel buttons
+ */
+sweetAlert.disableButtons = swal.disableButtons = function (event) {
+  var modal = _sweetAlertInitialize$getModal$getOverlay$getInput$setFocusStyle$openModal$resetInput$fixVerticalPosition.getModal();
+  var $confirmButton = modal.querySelector('button.confirm');
+  var $cancelButton = modal.querySelector('button.cancel');
+  $confirmButton.disabled = true;
+  $cancelButton.disabled = true;
+};
+
+/*
+ * Enable confirm and cancel buttons
+ */
+sweetAlert.enableButtons = swal.enableButtons = function (event) {
+  var modal = _sweetAlertInitialize$getModal$getOverlay$getInput$setFocusStyle$openModal$resetInput$fixVerticalPosition.getModal();
+  var $confirmButton = modal.querySelector('button.confirm');
+  var $cancelButton = modal.querySelector('button.cancel');
+  $confirmButton.disabled = false;
+  $cancelButton.disabled = false;
+};
+
+if (typeof window !== 'undefined') {
+  // The 'handle-click' module requires
+  // that 'sweetAlert' was set as global.
+  window.sweetAlert = window.swal = sweetAlert;
+} else {
+  _extend$hexToRgb$isIE8$logStr$colorLuminance.logStr('SweetAlert is a frontend module!');
+}
+module.exports = exports['default'];
 
 /***/ }),
-/* 16 */
+/* 20 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var injectedHTML =
+
+// Dark overlay
+"<div class=\"sweet-overlay\" tabIndex=\"-1\"></div>" +
+
+// Modal
+"<div class=\"sweet-alert\">" +
+
+// Error icon
+"<div class=\"sa-icon sa-error\">\n      <span class=\"sa-x-mark\">\n        <span class=\"sa-line sa-left\"></span>\n        <span class=\"sa-line sa-right\"></span>\n      </span>\n    </div>" +
+
+// Warning icon
+"<div class=\"sa-icon sa-warning\">\n      <span class=\"sa-body\"></span>\n      <span class=\"sa-dot\"></span>\n    </div>" +
+
+// Info icon
+"<div class=\"sa-icon sa-info\"></div>" +
+
+// Success icon
+"<div class=\"sa-icon sa-success\">\n      <span class=\"sa-line sa-tip\"></span>\n      <span class=\"sa-line sa-long\"></span>\n\n      <div class=\"sa-placeholder\"></div>\n      <div class=\"sa-fix\"></div>\n    </div>" + "<div class=\"sa-icon sa-custom\"></div>" +
+
+// Title, text and input
+"<h2>Title</h2>\n    <p>Text</p>\n    <fieldset>\n      <input type=\"text\" tabIndex=\"3\" />\n      <div class=\"sa-input-error\"></div>\n    </fieldset>" +
+
+// Input errors
+"<div class=\"sa-error-container\">\n      <div class=\"icon\">!</div>\n      <p>Not valid!</p>\n    </div>" +
+
+// Cancel and confirm buttons
+"<div class=\"sa-button-container\">\n      <button class=\"cancel\" tabIndex=\"2\">Cancel</button>\n      <div class=\"sa-confirm-button-container\">\n        <button class=\"confirm\" tabIndex=\"1\">OK</button>" +
+
+// Loading animation
+"<div class=\"la-ball-fall\">\n          <div></div>\n          <div></div>\n          <div></div>\n        </div>\n      </div>\n    </div>" +
+
+// End of modal
+"</div>";
+
+exports["default"] = injectedHTML;
+module.exports = exports["default"];
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _colorLuminance = __webpack_require__(2);
+
+var _getModal = __webpack_require__(3);
+
+var _hasClass$isDescendant = __webpack_require__(1);
+
+/*
+ * User clicked on "Confirm"/"OK" or "Cancel"
+ */
+var handleButton = function handleButton(event, params, modal) {
+  var e = event || window.event;
+  var target = e.target || e.srcElement;
+
+  var targetedConfirm = target.className.indexOf('confirm') !== -1;
+  var targetedOverlay = target.className.indexOf('sweet-overlay') !== -1;
+  var modalIsVisible = _hasClass$isDescendant.hasClass(modal, 'visible');
+  var doneFunctionExists = params.doneFunction && modal.getAttribute('data-has-done-function') === 'true';
+
+  // Since the user can change the background-color of the confirm button programmatically,
+  // we must calculate what the color should be on hover/active
+  var normalColor, hoverColor, activeColor;
+  if (targetedConfirm && params.confirmButtonColor) {
+    normalColor = params.confirmButtonColor;
+    hoverColor = _colorLuminance.colorLuminance(normalColor, -0.04);
+    activeColor = _colorLuminance.colorLuminance(normalColor, -0.14);
+  }
+
+  function shouldSetConfirmButtonColor(color) {
+    if (targetedConfirm && params.confirmButtonColor) {
+      target.style.backgroundColor = color;
+    }
+  }
+
+  switch (e.type) {
+    case 'mouseover':
+      shouldSetConfirmButtonColor(hoverColor);
+      break;
+
+    case 'mouseout':
+      shouldSetConfirmButtonColor(normalColor);
+      break;
+
+    case 'mousedown':
+      shouldSetConfirmButtonColor(activeColor);
+      break;
+
+    case 'mouseup':
+      shouldSetConfirmButtonColor(hoverColor);
+      break;
+
+    case 'focus':
+      var $confirmButton = modal.querySelector('button.confirm');
+      var $cancelButton = modal.querySelector('button.cancel');
+
+      if (targetedConfirm) {
+        $cancelButton.style.boxShadow = 'none';
+      } else {
+        $confirmButton.style.boxShadow = 'none';
+      }
+      break;
+
+    case 'click':
+      var clickedOnModal = modal === target;
+      var clickedOnModalChild = _hasClass$isDescendant.isDescendant(modal, target);
+
+      // Ignore click outside if allowOutsideClick is false
+      if (!clickedOnModal && !clickedOnModalChild && modalIsVisible && !params.allowOutsideClick) {
+        break;
+      }
+
+      if (targetedConfirm && doneFunctionExists && modalIsVisible) {
+        handleConfirm(modal, params);
+      } else if (doneFunctionExists && modalIsVisible || targetedOverlay) {
+        handleCancel(modal, params);
+      } else if (_hasClass$isDescendant.isDescendant(modal, target) && target.tagName === 'BUTTON') {
+        sweetAlert.close();
+      }
+      break;
+  }
+};
+
+/*
+ *  User clicked on "Confirm"/"OK"
+ */
+var handleConfirm = function handleConfirm(modal, params) {
+  var callbackValue = true;
+
+  if (_hasClass$isDescendant.hasClass(modal, 'show-input')) {
+    callbackValue = modal.querySelector('input').value;
+
+    if (!callbackValue) {
+      callbackValue = '';
+    }
+  }
+
+  params.doneFunction(callbackValue);
+
+  if (params.closeOnConfirm) {
+    sweetAlert.close();
+  }
+  // Disable cancel and confirm button if the parameter is true
+  if (params.showLoaderOnConfirm) {
+    sweetAlert.disableButtons();
+  }
+};
+
+/*
+ *  User clicked on "Cancel"
+ */
+var handleCancel = function handleCancel(modal, params) {
+  // Check if callback function expects a parameter (to track cancel actions)
+  var functionAsStr = String(params.doneFunction).replace(/\s/g, '');
+  var functionHandlesCancel = functionAsStr.substring(0, 9) === 'function(' && functionAsStr.substring(9, 10) !== ')';
+
+  if (functionHandlesCancel) {
+    params.doneFunction(false);
+  }
+
+  if (params.closeOnCancel) {
+    sweetAlert.close();
+  }
+};
+
+exports['default'] = {
+  handleButton: handleButton,
+  handleConfirm: handleConfirm,
+  handleCancel: handleCancel
+};
+module.exports = exports['default'];
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _stopEventPropagation$fireClick = __webpack_require__(1);
+
+var _setFocusStyle = __webpack_require__(3);
+
+var handleKeyDown = function handleKeyDown(event, params, modal) {
+  var e = event || window.event;
+  var keyCode = e.keyCode || e.which;
+
+  var $okButton = modal.querySelector('button.confirm');
+  var $cancelButton = modal.querySelector('button.cancel');
+  var $modalButtons = modal.querySelectorAll('button[tabindex]');
+
+  if ([9, 13, 32, 27].indexOf(keyCode) === -1) {
+    // Don't do work on keys we don't care about.
+    return;
+  }
+
+  var $targetElement = e.target || e.srcElement;
+
+  var btnIndex = -1; // Find the button - note, this is a nodelist, not an array.
+  for (var i = 0; i < $modalButtons.length; i++) {
+    if ($targetElement === $modalButtons[i]) {
+      btnIndex = i;
+      break;
+    }
+  }
+
+  if (keyCode === 9) {
+    // TAB
+    if (btnIndex === -1) {
+      // No button focused. Jump to the confirm button.
+      $targetElement = $okButton;
+    } else {
+      // Cycle to the next button
+      if (btnIndex === $modalButtons.length - 1) {
+        $targetElement = $modalButtons[0];
+      } else {
+        $targetElement = $modalButtons[btnIndex + 1];
+      }
+    }
+
+    _stopEventPropagation$fireClick.stopEventPropagation(e);
+    $targetElement.focus();
+
+    if (params.confirmButtonColor) {
+      _setFocusStyle.setFocusStyle($targetElement, params.confirmButtonColor);
+    }
+  } else {
+    if (keyCode === 13) {
+      if ($targetElement.tagName === 'INPUT') {
+        $targetElement = $okButton;
+        $okButton.focus();
+      }
+
+      if (btnIndex === -1) {
+        // ENTER/SPACE clicked outside of a button.
+        $targetElement = $okButton;
+      } else {
+        // Do nothing - let the browser handle it.
+        $targetElement = undefined;
+      }
+    } else if (keyCode === 27 && params.allowEscapeKey === true) {
+      $targetElement = $cancelButton;
+      _stopEventPropagation$fireClick.fireClick($targetElement, e);
+    } else {
+      // Fallback - let the browser handle it.
+      $targetElement = undefined;
+    }
+  }
+};
+
+exports['default'] = handleKeyDown;
+module.exports = exports['default'];
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _isIE8 = __webpack_require__(2);
+
+var _getModal$getInput$setFocusStyle = __webpack_require__(3);
+
+var _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide = __webpack_require__(1);
+
+var alertTypes = ['error', 'warning', 'info', 'success', 'input', 'prompt'];
+
+/*
+ * Set type, text and actions on modal
+ */
+var setParameters = function setParameters(params) {
+  var modal = _getModal$getInput$setFocusStyle.getModal();
+
+  var $title = modal.querySelector('h2');
+  var $text = modal.querySelector('p');
+  var $cancelBtn = modal.querySelector('button.cancel');
+  var $confirmBtn = modal.querySelector('button.confirm');
+
+  /*
+   * Title
+   */
+  $title.innerHTML = params.html ? params.title : _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.escapeHtml(params.title).split('\n').join('<br>');
+
+  /*
+   * Text
+   */
+  $text.innerHTML = params.html ? params.text : _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.escapeHtml(params.text || '').split('\n').join('<br>');
+  if (params.text) _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.show($text);
+
+  /*
+   * Custom class
+   */
+  if (params.customClass) {
+    _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.addClass(modal, params.customClass);
+    modal.setAttribute('data-custom-class', params.customClass);
+  } else {
+    // Find previously set classes and remove them
+    var customClass = modal.getAttribute('data-custom-class');
+    _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.removeClass(modal, customClass);
+    modal.setAttribute('data-custom-class', '');
+  }
+
+  /*
+   * Icon
+   */
+  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.hide(modal.querySelectorAll('.sa-icon'));
+
+  if (params.type && !_isIE8.isIE8()) {
+    var _ret = (function () {
+
+      var validType = false;
+
+      for (var i = 0; i < alertTypes.length; i++) {
+        if (params.type === alertTypes[i]) {
+          validType = true;
+          break;
+        }
+      }
+
+      if (!validType) {
+        logStr('Unknown alert type: ' + params.type);
+        return {
+          v: false
+        };
+      }
+
+      var typesWithIcons = ['success', 'error', 'warning', 'info'];
+      var $icon = undefined;
+
+      if (typesWithIcons.indexOf(params.type) !== -1) {
+        $icon = modal.querySelector('.sa-icon.' + 'sa-' + params.type);
+        _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.show($icon);
+      }
+
+      var $input = _getModal$getInput$setFocusStyle.getInput();
+
+      // Animate icon
+      switch (params.type) {
+
+        case 'success':
+          _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.addClass($icon, 'animate');
+          _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.addClass($icon.querySelector('.sa-tip'), 'animateSuccessTip');
+          _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.addClass($icon.querySelector('.sa-long'), 'animateSuccessLong');
+          break;
+
+        case 'error':
+          _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.addClass($icon, 'animateErrorIcon');
+          _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.addClass($icon.querySelector('.sa-x-mark'), 'animateXMark');
+          break;
+
+        case 'warning':
+          _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.addClass($icon, 'pulseWarning');
+          _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.addClass($icon.querySelector('.sa-body'), 'pulseWarningIns');
+          _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.addClass($icon.querySelector('.sa-dot'), 'pulseWarningIns');
+          break;
+
+        case 'input':
+        case 'prompt':
+          $input.setAttribute('type', params.inputType);
+          $input.value = params.inputValue;
+          $input.setAttribute('placeholder', params.inputPlaceholder);
+          _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.addClass(modal, 'show-input');
+          setTimeout(function () {
+            $input.focus();
+            $input.addEventListener('keyup', swal.resetInputError);
+          }, 400);
+          break;
+      }
+    })();
+
+    if (typeof _ret === 'object') {
+      return _ret.v;
+    }
+  }
+
+  /*
+   * Custom image
+   */
+  if (params.imageUrl) {
+    var $customIcon = modal.querySelector('.sa-icon.sa-custom');
+
+    $customIcon.style.backgroundImage = 'url(' + params.imageUrl + ')';
+    _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.show($customIcon);
+
+    var _imgWidth = 80;
+    var _imgHeight = 80;
+
+    if (params.imageSize) {
+      var dimensions = params.imageSize.toString().split('x');
+      var imgWidth = dimensions[0];
+      var imgHeight = dimensions[1];
+
+      if (!imgWidth || !imgHeight) {
+        logStr('Parameter imageSize expects value with format WIDTHxHEIGHT, got ' + params.imageSize);
+      } else {
+        _imgWidth = imgWidth;
+        _imgHeight = imgHeight;
+      }
+    }
+
+    $customIcon.setAttribute('style', $customIcon.getAttribute('style') + 'width:' + _imgWidth + 'px; height:' + _imgHeight + 'px');
+  }
+
+  /*
+   * Show cancel button?
+   */
+  modal.setAttribute('data-has-cancel-button', params.showCancelButton);
+  if (params.showCancelButton) {
+    $cancelBtn.style.display = 'inline-block';
+  } else {
+    _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.hide($cancelBtn);
+  }
+
+  /*
+   * Show confirm button?
+   */
+  modal.setAttribute('data-has-confirm-button', params.showConfirmButton);
+  if (params.showConfirmButton) {
+    $confirmBtn.style.display = 'inline-block';
+  } else {
+    _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.hide($confirmBtn);
+  }
+
+  /*
+   * Custom text on cancel/confirm buttons
+   */
+  if (params.cancelButtonText) {
+    $cancelBtn.innerHTML = _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.escapeHtml(params.cancelButtonText);
+  }
+  if (params.confirmButtonText) {
+    $confirmBtn.innerHTML = _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.escapeHtml(params.confirmButtonText);
+  }
+
+  /*
+   * Custom color on confirm button
+   */
+  if (params.confirmButtonColor) {
+    // Set confirm button to selected background color
+    $confirmBtn.style.backgroundColor = params.confirmButtonColor;
+
+    // Set the confirm button color to the loading ring
+    $confirmBtn.style.borderLeftColor = params.confirmLoadingButtonColor;
+    $confirmBtn.style.borderRightColor = params.confirmLoadingButtonColor;
+
+    // Set box-shadow to default focused button
+    _getModal$getInput$setFocusStyle.setFocusStyle($confirmBtn, params.confirmButtonColor);
+  }
+
+  /*
+   * Allow outside click
+   */
+  modal.setAttribute('data-allow-outside-click', params.allowOutsideClick);
+
+  /*
+   * Callback function
+   */
+  var hasDoneFunction = params.doneFunction ? true : false;
+  modal.setAttribute('data-has-done-function', hasDoneFunction);
+
+  /*
+   * Animation
+   */
+  if (!params.animation) {
+    modal.setAttribute('data-animation', 'none');
+  } else if (typeof params.animation === 'string') {
+    modal.setAttribute('data-animation', params.animation); // Custom animation
+  } else {
+    modal.setAttribute('data-animation', 'pop');
+  }
+
+  /*
+   * Timer
+   */
+  modal.setAttribute('data-timer', params.timer);
+};
+
+exports['default'] = setParameters;
+module.exports = exports['default'];
+
+/***/ }),
+/* 24 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(25);
+
+/***/ }),
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var utils = __webpack_require__(0);
-var bind = __webpack_require__(3);
-var Axios = __webpack_require__(18);
-var defaults = __webpack_require__(1);
+var bind = __webpack_require__(7);
+var Axios = __webpack_require__(27);
+var defaults = __webpack_require__(4);
 
 /**
  * Create an instance of Axios
@@ -30674,15 +29593,15 @@ axios.create = function create(instanceConfig) {
 };
 
 // Expose Cancel & CancelToken
-axios.Cancel = __webpack_require__(7);
-axios.CancelToken = __webpack_require__(33);
-axios.isCancel = __webpack_require__(6);
+axios.Cancel = __webpack_require__(11);
+axios.CancelToken = __webpack_require__(42);
+axios.isCancel = __webpack_require__(10);
 
 // Expose all/spread
 axios.all = function all(promises) {
   return Promise.all(promises);
 };
-axios.spread = __webpack_require__(34);
+axios.spread = __webpack_require__(43);
 
 module.exports = axios;
 
@@ -30691,7 +29610,7 @@ module.exports.default = axios;
 
 
 /***/ }),
-/* 17 */
+/* 26 */
 /***/ (function(module, exports) {
 
 /*!
@@ -30718,18 +29637,18 @@ function isSlowBuffer (obj) {
 
 
 /***/ }),
-/* 18 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var defaults = __webpack_require__(1);
+var defaults = __webpack_require__(4);
 var utils = __webpack_require__(0);
-var InterceptorManager = __webpack_require__(28);
-var dispatchRequest = __webpack_require__(29);
-var isAbsoluteURL = __webpack_require__(31);
-var combineURLs = __webpack_require__(32);
+var InterceptorManager = __webpack_require__(37);
+var dispatchRequest = __webpack_require__(38);
+var isAbsoluteURL = __webpack_require__(40);
+var combineURLs = __webpack_require__(41);
 
 /**
  * Create a new instance of Axios
@@ -30811,7 +29730,7 @@ module.exports = Axios;
 
 
 /***/ }),
-/* 19 */
+/* 28 */
 /***/ (function(module, exports) {
 
 // shim for using process in browser
@@ -31001,7 +29920,7 @@ process.umask = function() { return 0; };
 
 
 /***/ }),
-/* 20 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31020,13 +29939,13 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
 
 
 /***/ }),
-/* 21 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var createError = __webpack_require__(5);
+var createError = __webpack_require__(9);
 
 /**
  * Resolve or reject a Promise based on response status.
@@ -31053,7 +29972,7 @@ module.exports = function settle(resolve, reject, response) {
 
 
 /***/ }),
-/* 22 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31081,7 +30000,7 @@ module.exports = function enhanceError(error, config, code, request, response) {
 
 
 /***/ }),
-/* 23 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31156,7 +30075,7 @@ module.exports = function buildURL(url, params, paramsSerializer) {
 
 
 /***/ }),
-/* 24 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31200,7 +30119,7 @@ module.exports = function parseHeaders(headers) {
 
 
 /***/ }),
-/* 25 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31275,7 +30194,7 @@ module.exports = (
 
 
 /***/ }),
-/* 26 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31318,7 +30237,7 @@ module.exports = btoa;
 
 
 /***/ }),
-/* 27 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31378,7 +30297,7 @@ module.exports = (
 
 
 /***/ }),
-/* 28 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31437,16 +30356,16 @@ module.exports = InterceptorManager;
 
 
 /***/ }),
-/* 29 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var utils = __webpack_require__(0);
-var transformData = __webpack_require__(30);
-var isCancel = __webpack_require__(6);
-var defaults = __webpack_require__(1);
+var transformData = __webpack_require__(39);
+var isCancel = __webpack_require__(10);
+var defaults = __webpack_require__(4);
 
 /**
  * Throws a `Cancel` if cancellation has been requested.
@@ -31523,7 +30442,7 @@ module.exports = function dispatchRequest(config) {
 
 
 /***/ }),
-/* 30 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31550,7 +30469,7 @@ module.exports = function transformData(data, headers, fns) {
 
 
 /***/ }),
-/* 31 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31571,7 +30490,7 @@ module.exports = function isAbsoluteURL(url) {
 
 
 /***/ }),
-/* 32 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31592,13 +30511,13 @@ module.exports = function combineURLs(baseURL, relativeURL) {
 
 
 /***/ }),
-/* 33 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var Cancel = __webpack_require__(7);
+var Cancel = __webpack_require__(11);
 
 /**
  * A `CancelToken` is an object that can be used to request cancellation of an operation.
@@ -31656,7 +30575,7 @@ module.exports = CancelToken;
 
 
 /***/ }),
-/* 34 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31690,7 +30609,7 @@ module.exports = function spread(callback) {
 
 
 /***/ }),
-/* 35 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41782,18 +40701,18 @@ Vue$3.compile = compileToFunctions;
 
 module.exports = Vue$3;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5)))
 
 /***/ }),
-/* 36 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
-var Component = __webpack_require__(37)(
+var Component = __webpack_require__(46)(
   /* script */
-  __webpack_require__(38),
+  __webpack_require__(47),
   /* template */
-  __webpack_require__(39),
+  __webpack_require__(48),
   /* styles */
   null,
   /* scopeId */
@@ -41801,7 +40720,7 @@ var Component = __webpack_require__(37)(
   /* moduleIdentifier (server only) */
   null
 )
-Component.options.__file = "/Users/neonexxa/Desktop/backbonekfx/resources/assets/js/components/Example.vue"
+Component.options.__file = "D:\\Project\\github\\backbonekfx\\resources\\assets\\js\\components\\Example.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key.substr(0, 2) !== "__"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] Example.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -41825,7 +40744,7 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 37 */
+/* 46 */
 /***/ (function(module, exports) {
 
 /* globals __VUE_SSR_CONTEXT__ */
@@ -41922,7 +40841,7 @@ module.exports = function normalizeComponent (
 
 
 /***/ }),
-/* 38 */
+/* 47 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -41951,7 +40870,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 39 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -41980,1320 +40899,3560 @@ if (false) {
 }
 
 /***/ }),
-/* 40 */
+/* 49 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
 
 /***/ }),
-/* 41 */,
-/* 42 */,
-/* 43 */,
-/* 44 */,
-/* 45 */,
-/* 46 */,
-/* 47 */,
-/* 48 */,
-/* 49 */,
-/* 50 */
-/***/ (function(module, exports, __webpack_require__) {
+/* 50 */,
+/* 51 */,
+/* 52 */,
+/* 53 */,
+/* 54 */,
+/* 55 */,
+/* 56 */,
+/* 57 */,
+/* 58 */,
+/* 59 */
+/***/ (function(module, exports) {
 
-"use strict";
+/*!
+ * Bootstrap v4.0.0-alpha.6 (https://getbootstrap.com)
+ * Copyright 2011-2017 The Bootstrap Authors (https://github.com/twbs/bootstrap/graphs/contributors)
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ */
 
+if (typeof jQuery === 'undefined') {
+  throw new Error('Bootstrap\'s JavaScript requires jQuery. jQuery must be included before Bootstrap\'s JavaScript.')
+}
 
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-var hasClass = function hasClass(elem, className) {
-  return new RegExp(' ' + className + ' ').test(' ' + elem.className + ' ');
-};
-
-var addClass = function addClass(elem, className) {
-  if (!hasClass(elem, className)) {
-    elem.className += ' ' + className;
++function ($) {
+  var version = $.fn.jquery.split(' ')[0].split('.')
+  if ((version[0] < 2 && version[1] < 9) || (version[0] == 1 && version[1] == 9 && version[2] < 1) || (version[0] >= 4)) {
+    throw new Error('Bootstrap\'s JavaScript requires at least jQuery v1.9.1 but less than v4.0.0')
   }
-};
+}(jQuery);
 
-var removeClass = function removeClass(elem, className) {
-  var newClass = ' ' + elem.className.replace(/[\t\r\n]/g, ' ') + ' ';
-  if (hasClass(elem, className)) {
-    while (newClass.indexOf(' ' + className + ' ') >= 0) {
-      newClass = newClass.replace(' ' + className + ' ', ' ');
-    }
-    elem.className = newClass.replace(/^\s+|\s+$/g, '');
-  }
-};
 
-var escapeHtml = function escapeHtml(str) {
-  var div = document.createElement('div');
-  div.appendChild(document.createTextNode(str));
-  return div.innerHTML;
-};
++function () {
 
-var _show = function _show(elem) {
-  elem.style.opacity = '';
-  elem.style.display = 'block';
-};
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var show = function show(elems) {
-  if (elems && !elems.length) {
-    return _show(elems);
-  }
-  for (var i = 0; i < elems.length; ++i) {
-    _show(elems[i]);
-  }
-};
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _hide = function _hide(elem) {
-  elem.style.opacity = '';
-  elem.style.display = 'none';
-};
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-var hide = function hide(elems) {
-  if (elems && !elems.length) {
-    return _hide(elems);
-  }
-  for (var i = 0; i < elems.length; ++i) {
-    _hide(elems[i]);
-  }
-};
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var isDescendant = function isDescendant(parent, child) {
-  var node = child.parentNode;
-  while (node !== null) {
-    if (node === parent) {
-      return true;
-    }
-    node = node.parentNode;
-  }
-  return false;
-};
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var getTopMargin = function getTopMargin(elem) {
-  elem.style.left = '-9999px';
-  elem.style.display = 'block';
+/**
+ * --------------------------------------------------------------------------
+ * Bootstrap (v4.0.0-alpha.6): util.js
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * --------------------------------------------------------------------------
+ */
 
-  var height = elem.clientHeight,
-      padding;
-  if (typeof getComputedStyle !== 'undefined') {
-    // IE 8
-    padding = parseInt(getComputedStyle(elem).getPropertyValue('padding-top'), 10);
-  } else {
-    padding = parseInt(elem.currentStyle.padding);
+var Util = function ($) {
+
+  /**
+   * ------------------------------------------------------------------------
+   * Private TransitionEnd Helpers
+   * ------------------------------------------------------------------------
+   */
+
+  var transition = false;
+
+  var MAX_UID = 1000000;
+
+  var TransitionEndEvent = {
+    WebkitTransition: 'webkitTransitionEnd',
+    MozTransition: 'transitionend',
+    OTransition: 'oTransitionEnd otransitionend',
+    transition: 'transitionend'
+  };
+
+  // shoutout AngusCroll (https://goo.gl/pxwQGp)
+  function toType(obj) {
+    return {}.toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
   }
 
-  elem.style.left = '';
-  elem.style.display = 'none';
-  return '-' + parseInt((height + padding) / 2) + 'px';
-};
+  function isElement(obj) {
+    return (obj[0] || obj).nodeType;
+  }
 
-var fadeIn = function fadeIn(elem, interval) {
-  if (+elem.style.opacity < 1) {
-    interval = interval || 16;
-    elem.style.opacity = 0;
-    elem.style.display = 'block';
-    var last = +new Date();
-    var tick = (function (_tick) {
-      function tick() {
-        return _tick.apply(this, arguments);
+  function getSpecialTransitionEndEvent() {
+    return {
+      bindType: transition.end,
+      delegateType: transition.end,
+      handle: function handle(event) {
+        if ($(event.target).is(this)) {
+          return event.handleObj.handler.apply(this, arguments); // eslint-disable-line prefer-rest-params
+        }
+        return undefined;
       }
+    };
+  }
 
-      tick.toString = function () {
-        return _tick.toString();
-      };
+  function transitionEndTest() {
+    if (window.QUnit) {
+      return false;
+    }
 
-      return tick;
-    })(function () {
-      elem.style.opacity = +elem.style.opacity + (new Date() - last) / 100;
-      last = +new Date();
+    var el = document.createElement('bootstrap');
 
-      if (+elem.style.opacity < 1) {
-        setTimeout(tick, interval);
+    for (var name in TransitionEndEvent) {
+      if (el.style[name] !== undefined) {
+        return {
+          end: TransitionEndEvent[name]
+        };
       }
+    }
+
+    return false;
+  }
+
+  function transitionEndEmulator(duration) {
+    var _this = this;
+
+    var called = false;
+
+    $(this).one(Util.TRANSITION_END, function () {
+      called = true;
     });
-    tick();
-  }
-  elem.style.display = 'block'; //fallback IE8
-};
 
-var fadeOut = function fadeOut(elem, interval) {
-  interval = interval || 16;
-  elem.style.opacity = 1;
-  var last = +new Date();
-  var tick = (function (_tick2) {
-    function tick() {
-      return _tick2.apply(this, arguments);
+    setTimeout(function () {
+      if (!called) {
+        Util.triggerTransitionEnd(_this);
+      }
+    }, duration);
+
+    return this;
+  }
+
+  function setTransitionEndSupport() {
+    transition = transitionEndTest();
+
+    $.fn.emulateTransitionEnd = transitionEndEmulator;
+
+    if (Util.supportsTransitionEnd()) {
+      $.event.special[Util.TRANSITION_END] = getSpecialTransitionEndEvent();
+    }
+  }
+
+  /**
+   * --------------------------------------------------------------------------
+   * Public Util Api
+   * --------------------------------------------------------------------------
+   */
+
+  var Util = {
+
+    TRANSITION_END: 'bsTransitionEnd',
+
+    getUID: function getUID(prefix) {
+      do {
+        // eslint-disable-next-line no-bitwise
+        prefix += ~~(Math.random() * MAX_UID); // "~~" acts like a faster Math.floor() here
+      } while (document.getElementById(prefix));
+      return prefix;
+    },
+    getSelectorFromElement: function getSelectorFromElement(element) {
+      var selector = element.getAttribute('data-target');
+
+      if (!selector) {
+        selector = element.getAttribute('href') || '';
+        selector = /^#[a-z]/i.test(selector) ? selector : null;
+      }
+
+      return selector;
+    },
+    reflow: function reflow(element) {
+      return element.offsetHeight;
+    },
+    triggerTransitionEnd: function triggerTransitionEnd(element) {
+      $(element).trigger(transition.end);
+    },
+    supportsTransitionEnd: function supportsTransitionEnd() {
+      return Boolean(transition);
+    },
+    typeCheckConfig: function typeCheckConfig(componentName, config, configTypes) {
+      for (var property in configTypes) {
+        if (configTypes.hasOwnProperty(property)) {
+          var expectedTypes = configTypes[property];
+          var value = config[property];
+          var valueType = value && isElement(value) ? 'element' : toType(value);
+
+          if (!new RegExp(expectedTypes).test(valueType)) {
+            throw new Error(componentName.toUpperCase() + ': ' + ('Option "' + property + '" provided type "' + valueType + '" ') + ('but expected type "' + expectedTypes + '".'));
+          }
+        }
+      }
+    }
+  };
+
+  setTransitionEndSupport();
+
+  return Util;
+}(jQuery);
+
+/**
+ * --------------------------------------------------------------------------
+ * Bootstrap (v4.0.0-alpha.6): alert.js
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * --------------------------------------------------------------------------
+ */
+
+var Alert = function ($) {
+
+  /**
+   * ------------------------------------------------------------------------
+   * Constants
+   * ------------------------------------------------------------------------
+   */
+
+  var NAME = 'alert';
+  var VERSION = '4.0.0-alpha.6';
+  var DATA_KEY = 'bs.alert';
+  var EVENT_KEY = '.' + DATA_KEY;
+  var DATA_API_KEY = '.data-api';
+  var JQUERY_NO_CONFLICT = $.fn[NAME];
+  var TRANSITION_DURATION = 150;
+
+  var Selector = {
+    DISMISS: '[data-dismiss="alert"]'
+  };
+
+  var Event = {
+    CLOSE: 'close' + EVENT_KEY,
+    CLOSED: 'closed' + EVENT_KEY,
+    CLICK_DATA_API: 'click' + EVENT_KEY + DATA_API_KEY
+  };
+
+  var ClassName = {
+    ALERT: 'alert',
+    FADE: 'fade',
+    SHOW: 'show'
+  };
+
+  /**
+   * ------------------------------------------------------------------------
+   * Class Definition
+   * ------------------------------------------------------------------------
+   */
+
+  var Alert = function () {
+    function Alert(element) {
+      _classCallCheck(this, Alert);
+
+      this._element = element;
     }
 
-    tick.toString = function () {
-      return _tick2.toString();
+    // getters
+
+    // public
+
+    Alert.prototype.close = function close(element) {
+      element = element || this._element;
+
+      var rootElement = this._getRootElement(element);
+      var customEvent = this._triggerCloseEvent(rootElement);
+
+      if (customEvent.isDefaultPrevented()) {
+        return;
+      }
+
+      this._removeElement(rootElement);
     };
 
-    return tick;
-  })(function () {
-    elem.style.opacity = +elem.style.opacity - (new Date() - last) / 100;
-    last = +new Date();
+    Alert.prototype.dispose = function dispose() {
+      $.removeData(this._element, DATA_KEY);
+      this._element = null;
+    };
 
-    if (+elem.style.opacity > 0) {
-      setTimeout(tick, interval);
-    } else {
-      elem.style.display = 'none';
-    }
-  });
-  tick();
-};
+    // private
 
-var fireClick = function fireClick(node) {
-  // Taken from http://www.nonobtrusive.com/2011/11/29/programatically-fire-crossbrowser-click-event-with-javascript/
-  // Then fixed for today's Chrome browser.
-  if (typeof MouseEvent === 'function') {
-    // Up-to-date approach
-    var mevt = new MouseEvent('click', {
-      view: window,
-      bubbles: false,
-      cancelable: true
-    });
-    node.dispatchEvent(mevt);
-  } else if (document.createEvent) {
-    // Fallback
-    var evt = document.createEvent('MouseEvents');
-    evt.initEvent('click', false, false);
-    node.dispatchEvent(evt);
-  } else if (document.createEventObject) {
-    node.fireEvent('onclick');
-  } else if (typeof node.onclick === 'function') {
-    node.onclick();
-  }
-};
+    Alert.prototype._getRootElement = function _getRootElement(element) {
+      var selector = Util.getSelectorFromElement(element);
+      var parent = false;
 
-var stopEventPropagation = function stopEventPropagation(e) {
-  // In particular, make sure the space bar doesn't scroll the main window.
-  if (typeof e.stopPropagation === 'function') {
-    e.stopPropagation();
-    e.preventDefault();
-  } else if (window.event && window.event.hasOwnProperty('cancelBubble')) {
-    window.event.cancelBubble = true;
-  }
-};
+      if (selector) {
+        parent = $(selector)[0];
+      }
 
-exports.hasClass = hasClass;
-exports.addClass = addClass;
-exports.removeClass = removeClass;
-exports.escapeHtml = escapeHtml;
-exports._show = _show;
-exports.show = show;
-exports._hide = _hide;
-exports.hide = hide;
-exports.isDescendant = isDescendant;
-exports.getTopMargin = getTopMargin;
-exports.fadeIn = fadeIn;
-exports.fadeOut = fadeOut;
-exports.fireClick = fireClick;
-exports.stopEventPropagation = stopEventPropagation;
+      if (!parent) {
+        parent = $(element).closest('.' + ClassName.ALERT)[0];
+      }
 
-/***/ }),
-/* 51 */
-/***/ (function(module, exports, __webpack_require__) {
+      return parent;
+    };
 
-"use strict";
+    Alert.prototype._triggerCloseEvent = function _triggerCloseEvent(element) {
+      var closeEvent = $.Event(Event.CLOSE);
 
+      $(element).trigger(closeEvent);
+      return closeEvent;
+    };
 
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-/*
- * Allow user to pass their own params
- */
-var extend = function extend(a, b) {
-  for (var key in b) {
-    if (b.hasOwnProperty(key)) {
-      a[key] = b[key];
-    }
-  }
-  return a;
-};
+    Alert.prototype._removeElement = function _removeElement(element) {
+      var _this2 = this;
 
-/*
- * Convert HEX codes to RGB values (#000000 -> rgb(0,0,0))
- */
-var hexToRgb = function hexToRgb(hex) {
-  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? parseInt(result[1], 16) + ', ' + parseInt(result[2], 16) + ', ' + parseInt(result[3], 16) : null;
-};
+      $(element).removeClass(ClassName.SHOW);
 
-/*
- * Check if the user is using Internet Explorer 8 (for fallbacks)
- */
-var isIE8 = function isIE8() {
-  return window.attachEvent && !window.addEventListener;
-};
+      if (!Util.supportsTransitionEnd() || !$(element).hasClass(ClassName.FADE)) {
+        this._destroyElement(element);
+        return;
+      }
 
-/*
- * IE compatible logging for developers
- */
-var logStr = function logStr(string) {
-  if (window.console) {
-    // IE...
-    window.console.log('SweetAlert: ' + string);
-  }
-};
+      $(element).one(Util.TRANSITION_END, function (event) {
+        return _this2._destroyElement(element, event);
+      }).emulateTransitionEnd(TRANSITION_DURATION);
+    };
 
-/*
- * Set hover, active and focus-states for buttons 
- * (source: http://www.sitepoint.com/javascript-generate-lighter-darker-color)
- */
-var colorLuminance = function colorLuminance(hex, lum) {
-  // Validate hex string
-  hex = String(hex).replace(/[^0-9a-f]/gi, '');
-  if (hex.length < 6) {
-    hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-  }
-  lum = lum || 0;
+    Alert.prototype._destroyElement = function _destroyElement(element) {
+      $(element).detach().trigger(Event.CLOSED).remove();
+    };
 
-  // Convert to decimal and change luminosity
-  var rgb = '#';
-  var c;
-  var i;
+    // static
 
-  for (i = 0; i < 3; i++) {
-    c = parseInt(hex.substr(i * 2, 2), 16);
-    c = Math.round(Math.min(Math.max(0, c + c * lum), 255)).toString(16);
-    rgb += ('00' + c).substr(c.length);
-  }
+    Alert._jQueryInterface = function _jQueryInterface(config) {
+      return this.each(function () {
+        var $element = $(this);
+        var data = $element.data(DATA_KEY);
 
-  return rgb;
-};
+        if (!data) {
+          data = new Alert(this);
+          $element.data(DATA_KEY, data);
+        }
 
-exports.extend = extend;
-exports.hexToRgb = hexToRgb;
-exports.isIE8 = isIE8;
-exports.logStr = logStr;
-exports.colorLuminance = colorLuminance;
+        if (config === 'close') {
+          data[config](this);
+        }
+      });
+    };
 
-/***/ }),
-/* 52 */
-/***/ (function(module, exports, __webpack_require__) {
+    Alert._handleDismiss = function _handleDismiss(alertInstance) {
+      return function (event) {
+        if (event) {
+          event.preventDefault();
+        }
 
-"use strict";
+        alertInstance.close(this);
+      };
+    };
 
+    _createClass(Alert, null, [{
+      key: 'VERSION',
+      get: function get() {
+        return VERSION;
+      }
+    }]);
 
-var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
+    return Alert;
+  }();
 
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
+  /**
+   * ------------------------------------------------------------------------
+   * Data Api implementation
+   * ------------------------------------------------------------------------
+   */
 
-var _hexToRgb = __webpack_require__(51);
+  $(document).on(Event.CLICK_DATA_API, Selector.DISMISS, Alert._handleDismiss(new Alert()));
 
-var _removeClass$getTopMargin$fadeIn$show$addClass = __webpack_require__(50);
+  /**
+   * ------------------------------------------------------------------------
+   * jQuery
+   * ------------------------------------------------------------------------
+   */
 
-var _defaultParams = __webpack_require__(53);
-
-var _defaultParams2 = _interopRequireWildcard(_defaultParams);
-
-/*
- * Add modal + overlay to DOM
- */
-
-var _injectedHTML = __webpack_require__(55);
-
-var _injectedHTML2 = _interopRequireWildcard(_injectedHTML);
-
-var modalClass = '.sweet-alert';
-var overlayClass = '.sweet-overlay';
-
-var sweetAlertInitialize = function sweetAlertInitialize() {
-  var sweetWrap = document.createElement('div');
-  sweetWrap.innerHTML = _injectedHTML2['default'];
-
-  // Append elements to body
-  while (sweetWrap.firstChild) {
-    document.body.appendChild(sweetWrap.firstChild);
-  }
-};
-
-/*
- * Get DOM element of modal
- */
-var getModal = (function (_getModal) {
-  function getModal() {
-    return _getModal.apply(this, arguments);
-  }
-
-  getModal.toString = function () {
-    return _getModal.toString();
+  $.fn[NAME] = Alert._jQueryInterface;
+  $.fn[NAME].Constructor = Alert;
+  $.fn[NAME].noConflict = function () {
+    $.fn[NAME] = JQUERY_NO_CONFLICT;
+    return Alert._jQueryInterface;
   };
 
-  return getModal;
-})(function () {
-  var $modal = document.querySelector(modalClass);
+  return Alert;
+}(jQuery);
 
-  if (!$modal) {
-    sweetAlertInitialize();
-    $modal = getModal();
-  }
-
-  return $modal;
-});
-
-/*
- * Get DOM element of input (in modal)
- */
-var getInput = function getInput() {
-  var $modal = getModal();
-  if ($modal) {
-    return $modal.querySelector('input');
-  }
-};
-
-/*
- * Get DOM element of overlay
- */
-var getOverlay = function getOverlay() {
-  return document.querySelector(overlayClass);
-};
-
-/*
- * Add box-shadow style to button (depending on its chosen bg-color)
- */
-var setFocusStyle = function setFocusStyle($button, bgColor) {
-  var rgbColor = _hexToRgb.hexToRgb(bgColor);
-  $button.style.boxShadow = '0 0 2px rgba(' + rgbColor + ', 0.8), inset 0 0 0 1px rgba(0, 0, 0, 0.05)';
-};
-
-/*
- * Animation when opening modal
- */
-var openModal = function openModal(callback) {
-  var $modal = getModal();
-  _removeClass$getTopMargin$fadeIn$show$addClass.fadeIn(getOverlay(), 10);
-  _removeClass$getTopMargin$fadeIn$show$addClass.show($modal);
-  _removeClass$getTopMargin$fadeIn$show$addClass.addClass($modal, 'showSweetAlert');
-  _removeClass$getTopMargin$fadeIn$show$addClass.removeClass($modal, 'hideSweetAlert');
-
-  window.previousActiveElement = document.activeElement;
-  var $okButton = $modal.querySelector('button.confirm');
-  $okButton.focus();
-
-  setTimeout(function () {
-    _removeClass$getTopMargin$fadeIn$show$addClass.addClass($modal, 'visible');
-  }, 500);
-
-  var timer = $modal.getAttribute('data-timer');
-
-  if (timer !== 'null' && timer !== '') {
-    var timerCallback = callback;
-    $modal.timeout = setTimeout(function () {
-      var doneFunctionExists = (timerCallback || null) && $modal.getAttribute('data-has-done-function') === 'true';
-      if (doneFunctionExists) {
-        timerCallback(null);
-      } else {
-        sweetAlert.close();
-      }
-    }, timer);
-  }
-};
-
-/*
- * Reset the styling of the input
- * (for example if errors have been shown)
- */
-var resetInput = function resetInput() {
-  var $modal = getModal();
-  var $input = getInput();
-
-  _removeClass$getTopMargin$fadeIn$show$addClass.removeClass($modal, 'show-input');
-  $input.value = _defaultParams2['default'].inputValue;
-  $input.setAttribute('type', _defaultParams2['default'].inputType);
-  $input.setAttribute('placeholder', _defaultParams2['default'].inputPlaceholder);
-
-  resetInputError();
-};
-
-var resetInputError = function resetInputError(event) {
-  // If press enter => ignore
-  if (event && event.keyCode === 13) {
-    return false;
-  }
-
-  var $modal = getModal();
-
-  var $errorIcon = $modal.querySelector('.sa-input-error');
-  _removeClass$getTopMargin$fadeIn$show$addClass.removeClass($errorIcon, 'show');
-
-  var $errorContainer = $modal.querySelector('.sa-error-container');
-  _removeClass$getTopMargin$fadeIn$show$addClass.removeClass($errorContainer, 'show');
-};
-
-/*
- * Set "margin-top"-property on modal based on its computed height
- */
-var fixVerticalPosition = function fixVerticalPosition() {
-  var $modal = getModal();
-  $modal.style.marginTop = _removeClass$getTopMargin$fadeIn$show$addClass.getTopMargin(getModal());
-};
-
-exports.sweetAlertInitialize = sweetAlertInitialize;
-exports.getModal = getModal;
-exports.getOverlay = getOverlay;
-exports.getInput = getInput;
-exports.setFocusStyle = setFocusStyle;
-exports.openModal = openModal;
-exports.resetInput = resetInput;
-exports.resetInputError = resetInputError;
-exports.fixVerticalPosition = fixVerticalPosition;
-
-/***/ }),
-/* 53 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-var defaultParams = {
-  title: '',
-  text: '',
-  type: null,
-  allowOutsideClick: false,
-  showConfirmButton: true,
-  showCancelButton: false,
-  closeOnConfirm: true,
-  closeOnCancel: true,
-  confirmButtonText: 'OK',
-  confirmButtonColor: '#8CD4F5',
-  cancelButtonText: 'Cancel',
-  imageUrl: null,
-  imageSize: null,
-  timer: null,
-  customClass: '',
-  html: false,
-  animation: true,
-  allowEscapeKey: true,
-  inputType: 'text',
-  inputPlaceholder: '',
-  inputValue: '',
-  showLoaderOnConfirm: false
-};
-
-exports['default'] = defaultParams;
-module.exports = exports['default'];
-
-/***/ }),
-/* 54 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
-
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-// SweetAlert
-// 2014-2015 (c) - Tristan Edwards
-// github.com/t4t5/sweetalert
-
-/*
- * jQuery-like functions for manipulating the DOM
+/**
+ * --------------------------------------------------------------------------
+ * Bootstrap (v4.0.0-alpha.6): button.js
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * --------------------------------------------------------------------------
  */
 
-var _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation = __webpack_require__(50);
+var Button = function ($) {
 
-/*
- * Handy utilities
- */
-
-var _extend$hexToRgb$isIE8$logStr$colorLuminance = __webpack_require__(51);
-
-/*
- *  Handle sweetAlert's DOM elements
- */
-
-var _sweetAlertInitialize$getModal$getOverlay$getInput$setFocusStyle$openModal$resetInput$fixVerticalPosition = __webpack_require__(52);
-
-// Handle button events and keyboard events
-
-var _handleButton$handleConfirm$handleCancel = __webpack_require__(56);
-
-var _handleKeyDown = __webpack_require__(57);
-
-var _handleKeyDown2 = _interopRequireWildcard(_handleKeyDown);
-
-// Default values
-
-var _defaultParams = __webpack_require__(53);
-
-var _defaultParams2 = _interopRequireWildcard(_defaultParams);
-
-var _setParameters = __webpack_require__(58);
-
-var _setParameters2 = _interopRequireWildcard(_setParameters);
-
-/*
- * Remember state in cases where opening and handling a modal will fiddle with it.
- * (We also use window.previousActiveElement as a global variable)
- */
-var previousWindowKeyDown;
-var lastFocusedButton;
-
-/*
- * Global sweetAlert function
- * (this is what the user calls)
- */
-var sweetAlert, swal;
-
-exports['default'] = sweetAlert = swal = function () {
-  var customizations = arguments[0];
-
-  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.addClass(document.body, 'stop-scrolling');
-  _sweetAlertInitialize$getModal$getOverlay$getInput$setFocusStyle$openModal$resetInput$fixVerticalPosition.resetInput();
-
-  /*
-   * Use argument if defined or default value from params object otherwise.
-   * Supports the case where a default value is boolean true and should be
-   * overridden by a corresponding explicit argument which is boolean false.
+  /**
+   * ------------------------------------------------------------------------
+   * Constants
+   * ------------------------------------------------------------------------
    */
-  function argumentOrDefault(key) {
-    var args = customizations;
-    return args[key] === undefined ? _defaultParams2['default'][key] : args[key];
-  }
 
-  if (customizations === undefined) {
-    _extend$hexToRgb$isIE8$logStr$colorLuminance.logStr('SweetAlert expects at least 1 attribute!');
-    return false;
-  }
+  var NAME = 'button';
+  var VERSION = '4.0.0-alpha.6';
+  var DATA_KEY = 'bs.button';
+  var EVENT_KEY = '.' + DATA_KEY;
+  var DATA_API_KEY = '.data-api';
+  var JQUERY_NO_CONFLICT = $.fn[NAME];
 
-  var params = _extend$hexToRgb$isIE8$logStr$colorLuminance.extend({}, _defaultParams2['default']);
-
-  switch (typeof customizations) {
-
-    // Ex: swal("Hello", "Just testing", "info");
-    case 'string':
-      params.title = customizations;
-      params.text = arguments[1] || '';
-      params.type = arguments[2] || '';
-      break;
-
-    // Ex: swal({ title:"Hello", text: "Just testing", type: "info" });
-    case 'object':
-      if (customizations.title === undefined) {
-        _extend$hexToRgb$isIE8$logStr$colorLuminance.logStr('Missing "title" argument!');
-        return false;
-      }
-
-      params.title = customizations.title;
-
-      for (var customName in _defaultParams2['default']) {
-        params[customName] = argumentOrDefault(customName);
-      }
-
-      // Show "Confirm" instead of "OK" if cancel button is visible
-      params.confirmButtonText = params.showCancelButton ? 'Confirm' : _defaultParams2['default'].confirmButtonText;
-      params.confirmButtonText = argumentOrDefault('confirmButtonText');
-
-      // Callback function when clicking on "OK"/"Cancel"
-      params.doneFunction = arguments[1] || null;
-
-      break;
-
-    default:
-      _extend$hexToRgb$isIE8$logStr$colorLuminance.logStr('Unexpected type of argument! Expected "string" or "object", got ' + typeof customizations);
-      return false;
-
-  }
-
-  _setParameters2['default'](params);
-  _sweetAlertInitialize$getModal$getOverlay$getInput$setFocusStyle$openModal$resetInput$fixVerticalPosition.fixVerticalPosition();
-  _sweetAlertInitialize$getModal$getOverlay$getInput$setFocusStyle$openModal$resetInput$fixVerticalPosition.openModal(arguments[1]);
-
-  // Modal interactions
-  var modal = _sweetAlertInitialize$getModal$getOverlay$getInput$setFocusStyle$openModal$resetInput$fixVerticalPosition.getModal();
-
-  /*
-   * Make sure all modal buttons respond to all events
-   */
-  var $buttons = modal.querySelectorAll('button');
-  var buttonEvents = ['onclick', 'onmouseover', 'onmouseout', 'onmousedown', 'onmouseup', 'onfocus'];
-  var onButtonEvent = function onButtonEvent(e) {
-    return _handleButton$handleConfirm$handleCancel.handleButton(e, params, modal);
+  var ClassName = {
+    ACTIVE: 'active',
+    BUTTON: 'btn',
+    FOCUS: 'focus'
   };
 
-  for (var btnIndex = 0; btnIndex < $buttons.length; btnIndex++) {
-    for (var evtIndex = 0; evtIndex < buttonEvents.length; evtIndex++) {
-      var btnEvt = buttonEvents[evtIndex];
-      $buttons[btnIndex][btnEvt] = onButtonEvent;
-    }
-  }
-
-  // Clicking outside the modal dismisses it (if allowed by user)
-  _sweetAlertInitialize$getModal$getOverlay$getInput$setFocusStyle$openModal$resetInput$fixVerticalPosition.getOverlay().onclick = onButtonEvent;
-
-  previousWindowKeyDown = window.onkeydown;
-
-  var onKeyEvent = function onKeyEvent(e) {
-    return _handleKeyDown2['default'](e, params, modal);
-  };
-  window.onkeydown = onKeyEvent;
-
-  window.onfocus = function () {
-    // When the user has focused away and focused back from the whole window.
-    setTimeout(function () {
-      // Put in a timeout to jump out of the event sequence.
-      // Calling focus() in the event sequence confuses things.
-      if (lastFocusedButton !== undefined) {
-        lastFocusedButton.focus();
-        lastFocusedButton = undefined;
-      }
-    }, 0);
+  var Selector = {
+    DATA_TOGGLE_CARROT: '[data-toggle^="button"]',
+    DATA_TOGGLE: '[data-toggle="buttons"]',
+    INPUT: 'input',
+    ACTIVE: '.active',
+    BUTTON: '.btn'
   };
 
-  // Show alert with enabled buttons always
-  swal.enableButtons();
-};
+  var Event = {
+    CLICK_DATA_API: 'click' + EVENT_KEY + DATA_API_KEY,
+    FOCUS_BLUR_DATA_API: 'focus' + EVENT_KEY + DATA_API_KEY + ' ' + ('blur' + EVENT_KEY + DATA_API_KEY)
+  };
 
-/*
- * Set default params for each popup
- * @param {Object} userParams
- */
-sweetAlert.setDefaults = swal.setDefaults = function (userParams) {
-  if (!userParams) {
-    throw new Error('userParams is required');
-  }
-  if (typeof userParams !== 'object') {
-    throw new Error('userParams has to be a object');
-  }
-
-  _extend$hexToRgb$isIE8$logStr$colorLuminance.extend(_defaultParams2['default'], userParams);
-};
-
-/*
- * Animation when closing modal
- */
-sweetAlert.close = swal.close = function () {
-  var modal = _sweetAlertInitialize$getModal$getOverlay$getInput$setFocusStyle$openModal$resetInput$fixVerticalPosition.getModal();
-
-  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.fadeOut(_sweetAlertInitialize$getModal$getOverlay$getInput$setFocusStyle$openModal$resetInput$fixVerticalPosition.getOverlay(), 5);
-  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.fadeOut(modal, 5);
-  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass(modal, 'showSweetAlert');
-  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.addClass(modal, 'hideSweetAlert');
-  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass(modal, 'visible');
-
-  /*
-   * Reset icon animations
+  /**
+   * ------------------------------------------------------------------------
+   * Class Definition
+   * ------------------------------------------------------------------------
    */
-  var $successIcon = modal.querySelector('.sa-icon.sa-success');
-  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass($successIcon, 'animate');
-  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass($successIcon.querySelector('.sa-tip'), 'animateSuccessTip');
-  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass($successIcon.querySelector('.sa-long'), 'animateSuccessLong');
 
-  var $errorIcon = modal.querySelector('.sa-icon.sa-error');
-  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass($errorIcon, 'animateErrorIcon');
-  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass($errorIcon.querySelector('.sa-x-mark'), 'animateXMark');
+  var Button = function () {
+    function Button(element) {
+      _classCallCheck(this, Button);
 
-  var $warningIcon = modal.querySelector('.sa-icon.sa-warning');
-  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass($warningIcon, 'pulseWarning');
-  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass($warningIcon.querySelector('.sa-body'), 'pulseWarningIns');
-  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass($warningIcon.querySelector('.sa-dot'), 'pulseWarningIns');
-
-  // Reset custom class (delay so that UI changes aren't visible)
-  setTimeout(function () {
-    var customClass = modal.getAttribute('data-custom-class');
-    _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass(modal, customClass);
-  }, 300);
-
-  // Make page scrollable again
-  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass(document.body, 'stop-scrolling');
-
-  // Reset the page to its previous state
-  window.onkeydown = previousWindowKeyDown;
-  if (window.previousActiveElement) {
-    window.previousActiveElement.focus();
-  }
-  lastFocusedButton = undefined;
-  clearTimeout(modal.timeout);
-
-  return true;
-};
-
-/*
- * Validation of the input field is done by user
- * If something is wrong => call showInputError with errorMessage
- */
-sweetAlert.showInputError = swal.showInputError = function (errorMessage) {
-  var modal = _sweetAlertInitialize$getModal$getOverlay$getInput$setFocusStyle$openModal$resetInput$fixVerticalPosition.getModal();
-
-  var $errorIcon = modal.querySelector('.sa-input-error');
-  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.addClass($errorIcon, 'show');
-
-  var $errorContainer = modal.querySelector('.sa-error-container');
-  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.addClass($errorContainer, 'show');
-
-  $errorContainer.querySelector('p').innerHTML = errorMessage;
-
-  setTimeout(function () {
-    sweetAlert.enableButtons();
-  }, 1);
-
-  modal.querySelector('input').focus();
-};
-
-/*
- * Reset input error DOM elements
- */
-sweetAlert.resetInputError = swal.resetInputError = function (event) {
-  // If press enter => ignore
-  if (event && event.keyCode === 13) {
-    return false;
-  }
-
-  var $modal = _sweetAlertInitialize$getModal$getOverlay$getInput$setFocusStyle$openModal$resetInput$fixVerticalPosition.getModal();
-
-  var $errorIcon = $modal.querySelector('.sa-input-error');
-  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass($errorIcon, 'show');
-
-  var $errorContainer = $modal.querySelector('.sa-error-container');
-  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide$isDescendant$getTopMargin$fadeIn$fadeOut$fireClick$stopEventPropagation.removeClass($errorContainer, 'show');
-};
-
-/*
- * Disable confirm and cancel buttons
- */
-sweetAlert.disableButtons = swal.disableButtons = function (event) {
-  var modal = _sweetAlertInitialize$getModal$getOverlay$getInput$setFocusStyle$openModal$resetInput$fixVerticalPosition.getModal();
-  var $confirmButton = modal.querySelector('button.confirm');
-  var $cancelButton = modal.querySelector('button.cancel');
-  $confirmButton.disabled = true;
-  $cancelButton.disabled = true;
-};
-
-/*
- * Enable confirm and cancel buttons
- */
-sweetAlert.enableButtons = swal.enableButtons = function (event) {
-  var modal = _sweetAlertInitialize$getModal$getOverlay$getInput$setFocusStyle$openModal$resetInput$fixVerticalPosition.getModal();
-  var $confirmButton = modal.querySelector('button.confirm');
-  var $cancelButton = modal.querySelector('button.cancel');
-  $confirmButton.disabled = false;
-  $cancelButton.disabled = false;
-};
-
-if (typeof window !== 'undefined') {
-  // The 'handle-click' module requires
-  // that 'sweetAlert' was set as global.
-  window.sweetAlert = window.swal = sweetAlert;
-} else {
-  _extend$hexToRgb$isIE8$logStr$colorLuminance.logStr('SweetAlert is a frontend module!');
-}
-module.exports = exports['default'];
-
-/***/ }),
-/* 55 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var injectedHTML =
-
-// Dark overlay
-"<div class=\"sweet-overlay\" tabIndex=\"-1\"></div>" +
-
-// Modal
-"<div class=\"sweet-alert\">" +
-
-// Error icon
-"<div class=\"sa-icon sa-error\">\n      <span class=\"sa-x-mark\">\n        <span class=\"sa-line sa-left\"></span>\n        <span class=\"sa-line sa-right\"></span>\n      </span>\n    </div>" +
-
-// Warning icon
-"<div class=\"sa-icon sa-warning\">\n      <span class=\"sa-body\"></span>\n      <span class=\"sa-dot\"></span>\n    </div>" +
-
-// Info icon
-"<div class=\"sa-icon sa-info\"></div>" +
-
-// Success icon
-"<div class=\"sa-icon sa-success\">\n      <span class=\"sa-line sa-tip\"></span>\n      <span class=\"sa-line sa-long\"></span>\n\n      <div class=\"sa-placeholder\"></div>\n      <div class=\"sa-fix\"></div>\n    </div>" + "<div class=\"sa-icon sa-custom\"></div>" +
-
-// Title, text and input
-"<h2>Title</h2>\n    <p>Text</p>\n    <fieldset>\n      <input type=\"text\" tabIndex=\"3\" />\n      <div class=\"sa-input-error\"></div>\n    </fieldset>" +
-
-// Input errors
-"<div class=\"sa-error-container\">\n      <div class=\"icon\">!</div>\n      <p>Not valid!</p>\n    </div>" +
-
-// Cancel and confirm buttons
-"<div class=\"sa-button-container\">\n      <button class=\"cancel\" tabIndex=\"2\">Cancel</button>\n      <div class=\"sa-confirm-button-container\">\n        <button class=\"confirm\" tabIndex=\"1\">OK</button>" +
-
-// Loading animation
-"<div class=\"la-ball-fall\">\n          <div></div>\n          <div></div>\n          <div></div>\n        </div>\n      </div>\n    </div>" +
-
-// End of modal
-"</div>";
-
-exports["default"] = injectedHTML;
-module.exports = exports["default"];
-
-/***/ }),
-/* 56 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-
-var _colorLuminance = __webpack_require__(51);
-
-var _getModal = __webpack_require__(52);
-
-var _hasClass$isDescendant = __webpack_require__(50);
-
-/*
- * User clicked on "Confirm"/"OK" or "Cancel"
- */
-var handleButton = function handleButton(event, params, modal) {
-  var e = event || window.event;
-  var target = e.target || e.srcElement;
-
-  var targetedConfirm = target.className.indexOf('confirm') !== -1;
-  var targetedOverlay = target.className.indexOf('sweet-overlay') !== -1;
-  var modalIsVisible = _hasClass$isDescendant.hasClass(modal, 'visible');
-  var doneFunctionExists = params.doneFunction && modal.getAttribute('data-has-done-function') === 'true';
-
-  // Since the user can change the background-color of the confirm button programmatically,
-  // we must calculate what the color should be on hover/active
-  var normalColor, hoverColor, activeColor;
-  if (targetedConfirm && params.confirmButtonColor) {
-    normalColor = params.confirmButtonColor;
-    hoverColor = _colorLuminance.colorLuminance(normalColor, -0.04);
-    activeColor = _colorLuminance.colorLuminance(normalColor, -0.14);
-  }
-
-  function shouldSetConfirmButtonColor(color) {
-    if (targetedConfirm && params.confirmButtonColor) {
-      target.style.backgroundColor = color;
-    }
-  }
-
-  switch (e.type) {
-    case 'mouseover':
-      shouldSetConfirmButtonColor(hoverColor);
-      break;
-
-    case 'mouseout':
-      shouldSetConfirmButtonColor(normalColor);
-      break;
-
-    case 'mousedown':
-      shouldSetConfirmButtonColor(activeColor);
-      break;
-
-    case 'mouseup':
-      shouldSetConfirmButtonColor(hoverColor);
-      break;
-
-    case 'focus':
-      var $confirmButton = modal.querySelector('button.confirm');
-      var $cancelButton = modal.querySelector('button.cancel');
-
-      if (targetedConfirm) {
-        $cancelButton.style.boxShadow = 'none';
-      } else {
-        $confirmButton.style.boxShadow = 'none';
-      }
-      break;
-
-    case 'click':
-      var clickedOnModal = modal === target;
-      var clickedOnModalChild = _hasClass$isDescendant.isDescendant(modal, target);
-
-      // Ignore click outside if allowOutsideClick is false
-      if (!clickedOnModal && !clickedOnModalChild && modalIsVisible && !params.allowOutsideClick) {
-        break;
-      }
-
-      if (targetedConfirm && doneFunctionExists && modalIsVisible) {
-        handleConfirm(modal, params);
-      } else if (doneFunctionExists && modalIsVisible || targetedOverlay) {
-        handleCancel(modal, params);
-      } else if (_hasClass$isDescendant.isDescendant(modal, target) && target.tagName === 'BUTTON') {
-        sweetAlert.close();
-      }
-      break;
-  }
-};
-
-/*
- *  User clicked on "Confirm"/"OK"
- */
-var handleConfirm = function handleConfirm(modal, params) {
-  var callbackValue = true;
-
-  if (_hasClass$isDescendant.hasClass(modal, 'show-input')) {
-    callbackValue = modal.querySelector('input').value;
-
-    if (!callbackValue) {
-      callbackValue = '';
-    }
-  }
-
-  params.doneFunction(callbackValue);
-
-  if (params.closeOnConfirm) {
-    sweetAlert.close();
-  }
-  // Disable cancel and confirm button if the parameter is true
-  if (params.showLoaderOnConfirm) {
-    sweetAlert.disableButtons();
-  }
-};
-
-/*
- *  User clicked on "Cancel"
- */
-var handleCancel = function handleCancel(modal, params) {
-  // Check if callback function expects a parameter (to track cancel actions)
-  var functionAsStr = String(params.doneFunction).replace(/\s/g, '');
-  var functionHandlesCancel = functionAsStr.substring(0, 9) === 'function(' && functionAsStr.substring(9, 10) !== ')';
-
-  if (functionHandlesCancel) {
-    params.doneFunction(false);
-  }
-
-  if (params.closeOnCancel) {
-    sweetAlert.close();
-  }
-};
-
-exports['default'] = {
-  handleButton: handleButton,
-  handleConfirm: handleConfirm,
-  handleCancel: handleCancel
-};
-module.exports = exports['default'];
-
-/***/ }),
-/* 57 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-
-var _stopEventPropagation$fireClick = __webpack_require__(50);
-
-var _setFocusStyle = __webpack_require__(52);
-
-var handleKeyDown = function handleKeyDown(event, params, modal) {
-  var e = event || window.event;
-  var keyCode = e.keyCode || e.which;
-
-  var $okButton = modal.querySelector('button.confirm');
-  var $cancelButton = modal.querySelector('button.cancel');
-  var $modalButtons = modal.querySelectorAll('button[tabindex]');
-
-  if ([9, 13, 32, 27].indexOf(keyCode) === -1) {
-    // Don't do work on keys we don't care about.
-    return;
-  }
-
-  var $targetElement = e.target || e.srcElement;
-
-  var btnIndex = -1; // Find the button - note, this is a nodelist, not an array.
-  for (var i = 0; i < $modalButtons.length; i++) {
-    if ($targetElement === $modalButtons[i]) {
-      btnIndex = i;
-      break;
-    }
-  }
-
-  if (keyCode === 9) {
-    // TAB
-    if (btnIndex === -1) {
-      // No button focused. Jump to the confirm button.
-      $targetElement = $okButton;
-    } else {
-      // Cycle to the next button
-      if (btnIndex === $modalButtons.length - 1) {
-        $targetElement = $modalButtons[0];
-      } else {
-        $targetElement = $modalButtons[btnIndex + 1];
-      }
+      this._element = element;
     }
 
-    _stopEventPropagation$fireClick.stopEventPropagation(e);
-    $targetElement.focus();
+    // getters
 
-    if (params.confirmButtonColor) {
-      _setFocusStyle.setFocusStyle($targetElement, params.confirmButtonColor);
-    }
-  } else {
-    if (keyCode === 13) {
-      if ($targetElement.tagName === 'INPUT') {
-        $targetElement = $okButton;
-        $okButton.focus();
-      }
+    // public
 
-      if (btnIndex === -1) {
-        // ENTER/SPACE clicked outside of a button.
-        $targetElement = $okButton;
-      } else {
-        // Do nothing - let the browser handle it.
-        $targetElement = undefined;
-      }
-    } else if (keyCode === 27 && params.allowEscapeKey === true) {
-      $targetElement = $cancelButton;
-      _stopEventPropagation$fireClick.fireClick($targetElement, e);
-    } else {
-      // Fallback - let the browser handle it.
-      $targetElement = undefined;
-    }
-  }
-};
+    Button.prototype.toggle = function toggle() {
+      var triggerChangeEvent = true;
+      var rootElement = $(this._element).closest(Selector.DATA_TOGGLE)[0];
 
-exports['default'] = handleKeyDown;
-module.exports = exports['default'];
+      if (rootElement) {
+        var input = $(this._element).find(Selector.INPUT)[0];
 
-/***/ }),
-/* 58 */
-/***/ (function(module, exports, __webpack_require__) {
+        if (input) {
+          if (input.type === 'radio') {
+            if (input.checked && $(this._element).hasClass(ClassName.ACTIVE)) {
+              triggerChangeEvent = false;
+            } else {
+              var activeElement = $(rootElement).find(Selector.ACTIVE)[0];
 
-"use strict";
+              if (activeElement) {
+                $(activeElement).removeClass(ClassName.ACTIVE);
+              }
+            }
+          }
 
+          if (triggerChangeEvent) {
+            input.checked = !$(this._element).hasClass(ClassName.ACTIVE);
+            $(input).trigger('change');
+          }
 
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-
-var _isIE8 = __webpack_require__(51);
-
-var _getModal$getInput$setFocusStyle = __webpack_require__(52);
-
-var _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide = __webpack_require__(50);
-
-var alertTypes = ['error', 'warning', 'info', 'success', 'input', 'prompt'];
-
-/*
- * Set type, text and actions on modal
- */
-var setParameters = function setParameters(params) {
-  var modal = _getModal$getInput$setFocusStyle.getModal();
-
-  var $title = modal.querySelector('h2');
-  var $text = modal.querySelector('p');
-  var $cancelBtn = modal.querySelector('button.cancel');
-  var $confirmBtn = modal.querySelector('button.confirm');
-
-  /*
-   * Title
-   */
-  $title.innerHTML = params.html ? params.title : _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.escapeHtml(params.title).split('\n').join('<br>');
-
-  /*
-   * Text
-   */
-  $text.innerHTML = params.html ? params.text : _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.escapeHtml(params.text || '').split('\n').join('<br>');
-  if (params.text) _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.show($text);
-
-  /*
-   * Custom class
-   */
-  if (params.customClass) {
-    _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.addClass(modal, params.customClass);
-    modal.setAttribute('data-custom-class', params.customClass);
-  } else {
-    // Find previously set classes and remove them
-    var customClass = modal.getAttribute('data-custom-class');
-    _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.removeClass(modal, customClass);
-    modal.setAttribute('data-custom-class', '');
-  }
-
-  /*
-   * Icon
-   */
-  _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.hide(modal.querySelectorAll('.sa-icon'));
-
-  if (params.type && !_isIE8.isIE8()) {
-    var _ret = (function () {
-
-      var validType = false;
-
-      for (var i = 0; i < alertTypes.length; i++) {
-        if (params.type === alertTypes[i]) {
-          validType = true;
-          break;
+          input.focus();
         }
       }
 
-      if (!validType) {
-        logStr('Unknown alert type: ' + params.type);
-        return {
-          v: false
+      this._element.setAttribute('aria-pressed', !$(this._element).hasClass(ClassName.ACTIVE));
+
+      if (triggerChangeEvent) {
+        $(this._element).toggleClass(ClassName.ACTIVE);
+      }
+    };
+
+    Button.prototype.dispose = function dispose() {
+      $.removeData(this._element, DATA_KEY);
+      this._element = null;
+    };
+
+    // static
+
+    Button._jQueryInterface = function _jQueryInterface(config) {
+      return this.each(function () {
+        var data = $(this).data(DATA_KEY);
+
+        if (!data) {
+          data = new Button(this);
+          $(this).data(DATA_KEY, data);
+        }
+
+        if (config === 'toggle') {
+          data[config]();
+        }
+      });
+    };
+
+    _createClass(Button, null, [{
+      key: 'VERSION',
+      get: function get() {
+        return VERSION;
+      }
+    }]);
+
+    return Button;
+  }();
+
+  /**
+   * ------------------------------------------------------------------------
+   * Data Api implementation
+   * ------------------------------------------------------------------------
+   */
+
+  $(document).on(Event.CLICK_DATA_API, Selector.DATA_TOGGLE_CARROT, function (event) {
+    event.preventDefault();
+
+    var button = event.target;
+
+    if (!$(button).hasClass(ClassName.BUTTON)) {
+      button = $(button).closest(Selector.BUTTON);
+    }
+
+    Button._jQueryInterface.call($(button), 'toggle');
+  }).on(Event.FOCUS_BLUR_DATA_API, Selector.DATA_TOGGLE_CARROT, function (event) {
+    var button = $(event.target).closest(Selector.BUTTON)[0];
+    $(button).toggleClass(ClassName.FOCUS, /^focus(in)?$/.test(event.type));
+  });
+
+  /**
+   * ------------------------------------------------------------------------
+   * jQuery
+   * ------------------------------------------------------------------------
+   */
+
+  $.fn[NAME] = Button._jQueryInterface;
+  $.fn[NAME].Constructor = Button;
+  $.fn[NAME].noConflict = function () {
+    $.fn[NAME] = JQUERY_NO_CONFLICT;
+    return Button._jQueryInterface;
+  };
+
+  return Button;
+}(jQuery);
+
+/**
+ * --------------------------------------------------------------------------
+ * Bootstrap (v4.0.0-alpha.6): carousel.js
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * --------------------------------------------------------------------------
+ */
+
+var Carousel = function ($) {
+
+  /**
+   * ------------------------------------------------------------------------
+   * Constants
+   * ------------------------------------------------------------------------
+   */
+
+  var NAME = 'carousel';
+  var VERSION = '4.0.0-alpha.6';
+  var DATA_KEY = 'bs.carousel';
+  var EVENT_KEY = '.' + DATA_KEY;
+  var DATA_API_KEY = '.data-api';
+  var JQUERY_NO_CONFLICT = $.fn[NAME];
+  var TRANSITION_DURATION = 600;
+  var ARROW_LEFT_KEYCODE = 37; // KeyboardEvent.which value for left arrow key
+  var ARROW_RIGHT_KEYCODE = 39; // KeyboardEvent.which value for right arrow key
+
+  var Default = {
+    interval: 5000,
+    keyboard: true,
+    slide: false,
+    pause: 'hover',
+    wrap: true
+  };
+
+  var DefaultType = {
+    interval: '(number|boolean)',
+    keyboard: 'boolean',
+    slide: '(boolean|string)',
+    pause: '(string|boolean)',
+    wrap: 'boolean'
+  };
+
+  var Direction = {
+    NEXT: 'next',
+    PREV: 'prev',
+    LEFT: 'left',
+    RIGHT: 'right'
+  };
+
+  var Event = {
+    SLIDE: 'slide' + EVENT_KEY,
+    SLID: 'slid' + EVENT_KEY,
+    KEYDOWN: 'keydown' + EVENT_KEY,
+    MOUSEENTER: 'mouseenter' + EVENT_KEY,
+    MOUSELEAVE: 'mouseleave' + EVENT_KEY,
+    LOAD_DATA_API: 'load' + EVENT_KEY + DATA_API_KEY,
+    CLICK_DATA_API: 'click' + EVENT_KEY + DATA_API_KEY
+  };
+
+  var ClassName = {
+    CAROUSEL: 'carousel',
+    ACTIVE: 'active',
+    SLIDE: 'slide',
+    RIGHT: 'carousel-item-right',
+    LEFT: 'carousel-item-left',
+    NEXT: 'carousel-item-next',
+    PREV: 'carousel-item-prev',
+    ITEM: 'carousel-item'
+  };
+
+  var Selector = {
+    ACTIVE: '.active',
+    ACTIVE_ITEM: '.active.carousel-item',
+    ITEM: '.carousel-item',
+    NEXT_PREV: '.carousel-item-next, .carousel-item-prev',
+    INDICATORS: '.carousel-indicators',
+    DATA_SLIDE: '[data-slide], [data-slide-to]',
+    DATA_RIDE: '[data-ride="carousel"]'
+  };
+
+  /**
+   * ------------------------------------------------------------------------
+   * Class Definition
+   * ------------------------------------------------------------------------
+   */
+
+  var Carousel = function () {
+    function Carousel(element, config) {
+      _classCallCheck(this, Carousel);
+
+      this._items = null;
+      this._interval = null;
+      this._activeElement = null;
+
+      this._isPaused = false;
+      this._isSliding = false;
+
+      this._config = this._getConfig(config);
+      this._element = $(element)[0];
+      this._indicatorsElement = $(this._element).find(Selector.INDICATORS)[0];
+
+      this._addEventListeners();
+    }
+
+    // getters
+
+    // public
+
+    Carousel.prototype.next = function next() {
+      if (this._isSliding) {
+        throw new Error('Carousel is sliding');
+      }
+      this._slide(Direction.NEXT);
+    };
+
+    Carousel.prototype.nextWhenVisible = function nextWhenVisible() {
+      // Don't call next when the page isn't visible
+      if (!document.hidden) {
+        this.next();
+      }
+    };
+
+    Carousel.prototype.prev = function prev() {
+      if (this._isSliding) {
+        throw new Error('Carousel is sliding');
+      }
+      this._slide(Direction.PREVIOUS);
+    };
+
+    Carousel.prototype.pause = function pause(event) {
+      if (!event) {
+        this._isPaused = true;
+      }
+
+      if ($(this._element).find(Selector.NEXT_PREV)[0] && Util.supportsTransitionEnd()) {
+        Util.triggerTransitionEnd(this._element);
+        this.cycle(true);
+      }
+
+      clearInterval(this._interval);
+      this._interval = null;
+    };
+
+    Carousel.prototype.cycle = function cycle(event) {
+      if (!event) {
+        this._isPaused = false;
+      }
+
+      if (this._interval) {
+        clearInterval(this._interval);
+        this._interval = null;
+      }
+
+      if (this._config.interval && !this._isPaused) {
+        this._interval = setInterval((document.visibilityState ? this.nextWhenVisible : this.next).bind(this), this._config.interval);
+      }
+    };
+
+    Carousel.prototype.to = function to(index) {
+      var _this3 = this;
+
+      this._activeElement = $(this._element).find(Selector.ACTIVE_ITEM)[0];
+
+      var activeIndex = this._getItemIndex(this._activeElement);
+
+      if (index > this._items.length - 1 || index < 0) {
+        return;
+      }
+
+      if (this._isSliding) {
+        $(this._element).one(Event.SLID, function () {
+          return _this3.to(index);
+        });
+        return;
+      }
+
+      if (activeIndex === index) {
+        this.pause();
+        this.cycle();
+        return;
+      }
+
+      var direction = index > activeIndex ? Direction.NEXT : Direction.PREVIOUS;
+
+      this._slide(direction, this._items[index]);
+    };
+
+    Carousel.prototype.dispose = function dispose() {
+      $(this._element).off(EVENT_KEY);
+      $.removeData(this._element, DATA_KEY);
+
+      this._items = null;
+      this._config = null;
+      this._element = null;
+      this._interval = null;
+      this._isPaused = null;
+      this._isSliding = null;
+      this._activeElement = null;
+      this._indicatorsElement = null;
+    };
+
+    // private
+
+    Carousel.prototype._getConfig = function _getConfig(config) {
+      config = $.extend({}, Default, config);
+      Util.typeCheckConfig(NAME, config, DefaultType);
+      return config;
+    };
+
+    Carousel.prototype._addEventListeners = function _addEventListeners() {
+      var _this4 = this;
+
+      if (this._config.keyboard) {
+        $(this._element).on(Event.KEYDOWN, function (event) {
+          return _this4._keydown(event);
+        });
+      }
+
+      if (this._config.pause === 'hover' && !('ontouchstart' in document.documentElement)) {
+        $(this._element).on(Event.MOUSEENTER, function (event) {
+          return _this4.pause(event);
+        }).on(Event.MOUSELEAVE, function (event) {
+          return _this4.cycle(event);
+        });
+      }
+    };
+
+    Carousel.prototype._keydown = function _keydown(event) {
+      if (/input|textarea/i.test(event.target.tagName)) {
+        return;
+      }
+
+      switch (event.which) {
+        case ARROW_LEFT_KEYCODE:
+          event.preventDefault();
+          this.prev();
+          break;
+        case ARROW_RIGHT_KEYCODE:
+          event.preventDefault();
+          this.next();
+          break;
+        default:
+          return;
+      }
+    };
+
+    Carousel.prototype._getItemIndex = function _getItemIndex(element) {
+      this._items = $.makeArray($(element).parent().find(Selector.ITEM));
+      return this._items.indexOf(element);
+    };
+
+    Carousel.prototype._getItemByDirection = function _getItemByDirection(direction, activeElement) {
+      var isNextDirection = direction === Direction.NEXT;
+      var isPrevDirection = direction === Direction.PREVIOUS;
+      var activeIndex = this._getItemIndex(activeElement);
+      var lastItemIndex = this._items.length - 1;
+      var isGoingToWrap = isPrevDirection && activeIndex === 0 || isNextDirection && activeIndex === lastItemIndex;
+
+      if (isGoingToWrap && !this._config.wrap) {
+        return activeElement;
+      }
+
+      var delta = direction === Direction.PREVIOUS ? -1 : 1;
+      var itemIndex = (activeIndex + delta) % this._items.length;
+
+      return itemIndex === -1 ? this._items[this._items.length - 1] : this._items[itemIndex];
+    };
+
+    Carousel.prototype._triggerSlideEvent = function _triggerSlideEvent(relatedTarget, eventDirectionName) {
+      var slideEvent = $.Event(Event.SLIDE, {
+        relatedTarget: relatedTarget,
+        direction: eventDirectionName
+      });
+
+      $(this._element).trigger(slideEvent);
+
+      return slideEvent;
+    };
+
+    Carousel.prototype._setActiveIndicatorElement = function _setActiveIndicatorElement(element) {
+      if (this._indicatorsElement) {
+        $(this._indicatorsElement).find(Selector.ACTIVE).removeClass(ClassName.ACTIVE);
+
+        var nextIndicator = this._indicatorsElement.children[this._getItemIndex(element)];
+
+        if (nextIndicator) {
+          $(nextIndicator).addClass(ClassName.ACTIVE);
+        }
+      }
+    };
+
+    Carousel.prototype._slide = function _slide(direction, element) {
+      var _this5 = this;
+
+      var activeElement = $(this._element).find(Selector.ACTIVE_ITEM)[0];
+      var nextElement = element || activeElement && this._getItemByDirection(direction, activeElement);
+
+      var isCycling = Boolean(this._interval);
+
+      var directionalClassName = void 0;
+      var orderClassName = void 0;
+      var eventDirectionName = void 0;
+
+      if (direction === Direction.NEXT) {
+        directionalClassName = ClassName.LEFT;
+        orderClassName = ClassName.NEXT;
+        eventDirectionName = Direction.LEFT;
+      } else {
+        directionalClassName = ClassName.RIGHT;
+        orderClassName = ClassName.PREV;
+        eventDirectionName = Direction.RIGHT;
+      }
+
+      if (nextElement && $(nextElement).hasClass(ClassName.ACTIVE)) {
+        this._isSliding = false;
+        return;
+      }
+
+      var slideEvent = this._triggerSlideEvent(nextElement, eventDirectionName);
+      if (slideEvent.isDefaultPrevented()) {
+        return;
+      }
+
+      if (!activeElement || !nextElement) {
+        // some weirdness is happening, so we bail
+        return;
+      }
+
+      this._isSliding = true;
+
+      if (isCycling) {
+        this.pause();
+      }
+
+      this._setActiveIndicatorElement(nextElement);
+
+      var slidEvent = $.Event(Event.SLID, {
+        relatedTarget: nextElement,
+        direction: eventDirectionName
+      });
+
+      if (Util.supportsTransitionEnd() && $(this._element).hasClass(ClassName.SLIDE)) {
+
+        $(nextElement).addClass(orderClassName);
+
+        Util.reflow(nextElement);
+
+        $(activeElement).addClass(directionalClassName);
+        $(nextElement).addClass(directionalClassName);
+
+        $(activeElement).one(Util.TRANSITION_END, function () {
+          $(nextElement).removeClass(directionalClassName + ' ' + orderClassName).addClass(ClassName.ACTIVE);
+
+          $(activeElement).removeClass(ClassName.ACTIVE + ' ' + orderClassName + ' ' + directionalClassName);
+
+          _this5._isSliding = false;
+
+          setTimeout(function () {
+            return $(_this5._element).trigger(slidEvent);
+          }, 0);
+        }).emulateTransitionEnd(TRANSITION_DURATION);
+      } else {
+        $(activeElement).removeClass(ClassName.ACTIVE);
+        $(nextElement).addClass(ClassName.ACTIVE);
+
+        this._isSliding = false;
+        $(this._element).trigger(slidEvent);
+      }
+
+      if (isCycling) {
+        this.cycle();
+      }
+    };
+
+    // static
+
+    Carousel._jQueryInterface = function _jQueryInterface(config) {
+      return this.each(function () {
+        var data = $(this).data(DATA_KEY);
+        var _config = $.extend({}, Default, $(this).data());
+
+        if ((typeof config === 'undefined' ? 'undefined' : _typeof(config)) === 'object') {
+          $.extend(_config, config);
+        }
+
+        var action = typeof config === 'string' ? config : _config.slide;
+
+        if (!data) {
+          data = new Carousel(this, _config);
+          $(this).data(DATA_KEY, data);
+        }
+
+        if (typeof config === 'number') {
+          data.to(config);
+        } else if (typeof action === 'string') {
+          if (data[action] === undefined) {
+            throw new Error('No method named "' + action + '"');
+          }
+          data[action]();
+        } else if (_config.interval) {
+          data.pause();
+          data.cycle();
+        }
+      });
+    };
+
+    Carousel._dataApiClickHandler = function _dataApiClickHandler(event) {
+      var selector = Util.getSelectorFromElement(this);
+
+      if (!selector) {
+        return;
+      }
+
+      var target = $(selector)[0];
+
+      if (!target || !$(target).hasClass(ClassName.CAROUSEL)) {
+        return;
+      }
+
+      var config = $.extend({}, $(target).data(), $(this).data());
+      var slideIndex = this.getAttribute('data-slide-to');
+
+      if (slideIndex) {
+        config.interval = false;
+      }
+
+      Carousel._jQueryInterface.call($(target), config);
+
+      if (slideIndex) {
+        $(target).data(DATA_KEY).to(slideIndex);
+      }
+
+      event.preventDefault();
+    };
+
+    _createClass(Carousel, null, [{
+      key: 'VERSION',
+      get: function get() {
+        return VERSION;
+      }
+    }, {
+      key: 'Default',
+      get: function get() {
+        return Default;
+      }
+    }]);
+
+    return Carousel;
+  }();
+
+  /**
+   * ------------------------------------------------------------------------
+   * Data Api implementation
+   * ------------------------------------------------------------------------
+   */
+
+  $(document).on(Event.CLICK_DATA_API, Selector.DATA_SLIDE, Carousel._dataApiClickHandler);
+
+  $(window).on(Event.LOAD_DATA_API, function () {
+    $(Selector.DATA_RIDE).each(function () {
+      var $carousel = $(this);
+      Carousel._jQueryInterface.call($carousel, $carousel.data());
+    });
+  });
+
+  /**
+   * ------------------------------------------------------------------------
+   * jQuery
+   * ------------------------------------------------------------------------
+   */
+
+  $.fn[NAME] = Carousel._jQueryInterface;
+  $.fn[NAME].Constructor = Carousel;
+  $.fn[NAME].noConflict = function () {
+    $.fn[NAME] = JQUERY_NO_CONFLICT;
+    return Carousel._jQueryInterface;
+  };
+
+  return Carousel;
+}(jQuery);
+
+/**
+ * --------------------------------------------------------------------------
+ * Bootstrap (v4.0.0-alpha.6): collapse.js
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * --------------------------------------------------------------------------
+ */
+
+var Collapse = function ($) {
+
+  /**
+   * ------------------------------------------------------------------------
+   * Constants
+   * ------------------------------------------------------------------------
+   */
+
+  var NAME = 'collapse';
+  var VERSION = '4.0.0-alpha.6';
+  var DATA_KEY = 'bs.collapse';
+  var EVENT_KEY = '.' + DATA_KEY;
+  var DATA_API_KEY = '.data-api';
+  var JQUERY_NO_CONFLICT = $.fn[NAME];
+  var TRANSITION_DURATION = 600;
+
+  var Default = {
+    toggle: true,
+    parent: ''
+  };
+
+  var DefaultType = {
+    toggle: 'boolean',
+    parent: 'string'
+  };
+
+  var Event = {
+    SHOW: 'show' + EVENT_KEY,
+    SHOWN: 'shown' + EVENT_KEY,
+    HIDE: 'hide' + EVENT_KEY,
+    HIDDEN: 'hidden' + EVENT_KEY,
+    CLICK_DATA_API: 'click' + EVENT_KEY + DATA_API_KEY
+  };
+
+  var ClassName = {
+    SHOW: 'show',
+    COLLAPSE: 'collapse',
+    COLLAPSING: 'collapsing',
+    COLLAPSED: 'collapsed'
+  };
+
+  var Dimension = {
+    WIDTH: 'width',
+    HEIGHT: 'height'
+  };
+
+  var Selector = {
+    ACTIVES: '.card > .show, .card > .collapsing',
+    DATA_TOGGLE: '[data-toggle="collapse"]'
+  };
+
+  /**
+   * ------------------------------------------------------------------------
+   * Class Definition
+   * ------------------------------------------------------------------------
+   */
+
+  var Collapse = function () {
+    function Collapse(element, config) {
+      _classCallCheck(this, Collapse);
+
+      this._isTransitioning = false;
+      this._element = element;
+      this._config = this._getConfig(config);
+      this._triggerArray = $.makeArray($('[data-toggle="collapse"][href="#' + element.id + '"],' + ('[data-toggle="collapse"][data-target="#' + element.id + '"]')));
+
+      this._parent = this._config.parent ? this._getParent() : null;
+
+      if (!this._config.parent) {
+        this._addAriaAndCollapsedClass(this._element, this._triggerArray);
+      }
+
+      if (this._config.toggle) {
+        this.toggle();
+      }
+    }
+
+    // getters
+
+    // public
+
+    Collapse.prototype.toggle = function toggle() {
+      if ($(this._element).hasClass(ClassName.SHOW)) {
+        this.hide();
+      } else {
+        this.show();
+      }
+    };
+
+    Collapse.prototype.show = function show() {
+      var _this6 = this;
+
+      if (this._isTransitioning) {
+        throw new Error('Collapse is transitioning');
+      }
+
+      if ($(this._element).hasClass(ClassName.SHOW)) {
+        return;
+      }
+
+      var actives = void 0;
+      var activesData = void 0;
+
+      if (this._parent) {
+        actives = $.makeArray($(this._parent).find(Selector.ACTIVES));
+        if (!actives.length) {
+          actives = null;
+        }
+      }
+
+      if (actives) {
+        activesData = $(actives).data(DATA_KEY);
+        if (activesData && activesData._isTransitioning) {
+          return;
+        }
+      }
+
+      var startEvent = $.Event(Event.SHOW);
+      $(this._element).trigger(startEvent);
+      if (startEvent.isDefaultPrevented()) {
+        return;
+      }
+
+      if (actives) {
+        Collapse._jQueryInterface.call($(actives), 'hide');
+        if (!activesData) {
+          $(actives).data(DATA_KEY, null);
+        }
+      }
+
+      var dimension = this._getDimension();
+
+      $(this._element).removeClass(ClassName.COLLAPSE).addClass(ClassName.COLLAPSING);
+
+      this._element.style[dimension] = 0;
+      this._element.setAttribute('aria-expanded', true);
+
+      if (this._triggerArray.length) {
+        $(this._triggerArray).removeClass(ClassName.COLLAPSED).attr('aria-expanded', true);
+      }
+
+      this.setTransitioning(true);
+
+      var complete = function complete() {
+        $(_this6._element).removeClass(ClassName.COLLAPSING).addClass(ClassName.COLLAPSE).addClass(ClassName.SHOW);
+
+        _this6._element.style[dimension] = '';
+
+        _this6.setTransitioning(false);
+
+        $(_this6._element).trigger(Event.SHOWN);
+      };
+
+      if (!Util.supportsTransitionEnd()) {
+        complete();
+        return;
+      }
+
+      var capitalizedDimension = dimension[0].toUpperCase() + dimension.slice(1);
+      var scrollSize = 'scroll' + capitalizedDimension;
+
+      $(this._element).one(Util.TRANSITION_END, complete).emulateTransitionEnd(TRANSITION_DURATION);
+
+      this._element.style[dimension] = this._element[scrollSize] + 'px';
+    };
+
+    Collapse.prototype.hide = function hide() {
+      var _this7 = this;
+
+      if (this._isTransitioning) {
+        throw new Error('Collapse is transitioning');
+      }
+
+      if (!$(this._element).hasClass(ClassName.SHOW)) {
+        return;
+      }
+
+      var startEvent = $.Event(Event.HIDE);
+      $(this._element).trigger(startEvent);
+      if (startEvent.isDefaultPrevented()) {
+        return;
+      }
+
+      var dimension = this._getDimension();
+      var offsetDimension = dimension === Dimension.WIDTH ? 'offsetWidth' : 'offsetHeight';
+
+      this._element.style[dimension] = this._element[offsetDimension] + 'px';
+
+      Util.reflow(this._element);
+
+      $(this._element).addClass(ClassName.COLLAPSING).removeClass(ClassName.COLLAPSE).removeClass(ClassName.SHOW);
+
+      this._element.setAttribute('aria-expanded', false);
+
+      if (this._triggerArray.length) {
+        $(this._triggerArray).addClass(ClassName.COLLAPSED).attr('aria-expanded', false);
+      }
+
+      this.setTransitioning(true);
+
+      var complete = function complete() {
+        _this7.setTransitioning(false);
+        $(_this7._element).removeClass(ClassName.COLLAPSING).addClass(ClassName.COLLAPSE).trigger(Event.HIDDEN);
+      };
+
+      this._element.style[dimension] = '';
+
+      if (!Util.supportsTransitionEnd()) {
+        complete();
+        return;
+      }
+
+      $(this._element).one(Util.TRANSITION_END, complete).emulateTransitionEnd(TRANSITION_DURATION);
+    };
+
+    Collapse.prototype.setTransitioning = function setTransitioning(isTransitioning) {
+      this._isTransitioning = isTransitioning;
+    };
+
+    Collapse.prototype.dispose = function dispose() {
+      $.removeData(this._element, DATA_KEY);
+
+      this._config = null;
+      this._parent = null;
+      this._element = null;
+      this._triggerArray = null;
+      this._isTransitioning = null;
+    };
+
+    // private
+
+    Collapse.prototype._getConfig = function _getConfig(config) {
+      config = $.extend({}, Default, config);
+      config.toggle = Boolean(config.toggle); // coerce string values
+      Util.typeCheckConfig(NAME, config, DefaultType);
+      return config;
+    };
+
+    Collapse.prototype._getDimension = function _getDimension() {
+      var hasWidth = $(this._element).hasClass(Dimension.WIDTH);
+      return hasWidth ? Dimension.WIDTH : Dimension.HEIGHT;
+    };
+
+    Collapse.prototype._getParent = function _getParent() {
+      var _this8 = this;
+
+      var parent = $(this._config.parent)[0];
+      var selector = '[data-toggle="collapse"][data-parent="' + this._config.parent + '"]';
+
+      $(parent).find(selector).each(function (i, element) {
+        _this8._addAriaAndCollapsedClass(Collapse._getTargetFromElement(element), [element]);
+      });
+
+      return parent;
+    };
+
+    Collapse.prototype._addAriaAndCollapsedClass = function _addAriaAndCollapsedClass(element, triggerArray) {
+      if (element) {
+        var isOpen = $(element).hasClass(ClassName.SHOW);
+        element.setAttribute('aria-expanded', isOpen);
+
+        if (triggerArray.length) {
+          $(triggerArray).toggleClass(ClassName.COLLAPSED, !isOpen).attr('aria-expanded', isOpen);
+        }
+      }
+    };
+
+    // static
+
+    Collapse._getTargetFromElement = function _getTargetFromElement(element) {
+      var selector = Util.getSelectorFromElement(element);
+      return selector ? $(selector)[0] : null;
+    };
+
+    Collapse._jQueryInterface = function _jQueryInterface(config) {
+      return this.each(function () {
+        var $this = $(this);
+        var data = $this.data(DATA_KEY);
+        var _config = $.extend({}, Default, $this.data(), (typeof config === 'undefined' ? 'undefined' : _typeof(config)) === 'object' && config);
+
+        if (!data && _config.toggle && /show|hide/.test(config)) {
+          _config.toggle = false;
+        }
+
+        if (!data) {
+          data = new Collapse(this, _config);
+          $this.data(DATA_KEY, data);
+        }
+
+        if (typeof config === 'string') {
+          if (data[config] === undefined) {
+            throw new Error('No method named "' + config + '"');
+          }
+          data[config]();
+        }
+      });
+    };
+
+    _createClass(Collapse, null, [{
+      key: 'VERSION',
+      get: function get() {
+        return VERSION;
+      }
+    }, {
+      key: 'Default',
+      get: function get() {
+        return Default;
+      }
+    }]);
+
+    return Collapse;
+  }();
+
+  /**
+   * ------------------------------------------------------------------------
+   * Data Api implementation
+   * ------------------------------------------------------------------------
+   */
+
+  $(document).on(Event.CLICK_DATA_API, Selector.DATA_TOGGLE, function (event) {
+    event.preventDefault();
+
+    var target = Collapse._getTargetFromElement(this);
+    var data = $(target).data(DATA_KEY);
+    var config = data ? 'toggle' : $(this).data();
+
+    Collapse._jQueryInterface.call($(target), config);
+  });
+
+  /**
+   * ------------------------------------------------------------------------
+   * jQuery
+   * ------------------------------------------------------------------------
+   */
+
+  $.fn[NAME] = Collapse._jQueryInterface;
+  $.fn[NAME].Constructor = Collapse;
+  $.fn[NAME].noConflict = function () {
+    $.fn[NAME] = JQUERY_NO_CONFLICT;
+    return Collapse._jQueryInterface;
+  };
+
+  return Collapse;
+}(jQuery);
+
+/**
+ * --------------------------------------------------------------------------
+ * Bootstrap (v4.0.0-alpha.6): dropdown.js
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * --------------------------------------------------------------------------
+ */
+
+var Dropdown = function ($) {
+
+  /**
+   * ------------------------------------------------------------------------
+   * Constants
+   * ------------------------------------------------------------------------
+   */
+
+  var NAME = 'dropdown';
+  var VERSION = '4.0.0-alpha.6';
+  var DATA_KEY = 'bs.dropdown';
+  var EVENT_KEY = '.' + DATA_KEY;
+  var DATA_API_KEY = '.data-api';
+  var JQUERY_NO_CONFLICT = $.fn[NAME];
+  var ESCAPE_KEYCODE = 27; // KeyboardEvent.which value for Escape (Esc) key
+  var ARROW_UP_KEYCODE = 38; // KeyboardEvent.which value for up arrow key
+  var ARROW_DOWN_KEYCODE = 40; // KeyboardEvent.which value for down arrow key
+  var RIGHT_MOUSE_BUTTON_WHICH = 3; // MouseEvent.which value for the right button (assuming a right-handed mouse)
+
+  var Event = {
+    HIDE: 'hide' + EVENT_KEY,
+    HIDDEN: 'hidden' + EVENT_KEY,
+    SHOW: 'show' + EVENT_KEY,
+    SHOWN: 'shown' + EVENT_KEY,
+    CLICK: 'click' + EVENT_KEY,
+    CLICK_DATA_API: 'click' + EVENT_KEY + DATA_API_KEY,
+    FOCUSIN_DATA_API: 'focusin' + EVENT_KEY + DATA_API_KEY,
+    KEYDOWN_DATA_API: 'keydown' + EVENT_KEY + DATA_API_KEY
+  };
+
+  var ClassName = {
+    BACKDROP: 'dropdown-backdrop',
+    DISABLED: 'disabled',
+    SHOW: 'show'
+  };
+
+  var Selector = {
+    BACKDROP: '.dropdown-backdrop',
+    DATA_TOGGLE: '[data-toggle="dropdown"]',
+    FORM_CHILD: '.dropdown form',
+    ROLE_MENU: '[role="menu"]',
+    ROLE_LISTBOX: '[role="listbox"]',
+    NAVBAR_NAV: '.navbar-nav',
+    VISIBLE_ITEMS: '[role="menu"] li:not(.disabled) a, ' + '[role="listbox"] li:not(.disabled) a'
+  };
+
+  /**
+   * ------------------------------------------------------------------------
+   * Class Definition
+   * ------------------------------------------------------------------------
+   */
+
+  var Dropdown = function () {
+    function Dropdown(element) {
+      _classCallCheck(this, Dropdown);
+
+      this._element = element;
+
+      this._addEventListeners();
+    }
+
+    // getters
+
+    // public
+
+    Dropdown.prototype.toggle = function toggle() {
+      if (this.disabled || $(this).hasClass(ClassName.DISABLED)) {
+        return false;
+      }
+
+      var parent = Dropdown._getParentFromElement(this);
+      var isActive = $(parent).hasClass(ClassName.SHOW);
+
+      Dropdown._clearMenus();
+
+      if (isActive) {
+        return false;
+      }
+
+      if ('ontouchstart' in document.documentElement && !$(parent).closest(Selector.NAVBAR_NAV).length) {
+
+        // if mobile we use a backdrop because click events don't delegate
+        var dropdown = document.createElement('div');
+        dropdown.className = ClassName.BACKDROP;
+        $(dropdown).insertBefore(this);
+        $(dropdown).on('click', Dropdown._clearMenus);
+      }
+
+      var relatedTarget = {
+        relatedTarget: this
+      };
+      var showEvent = $.Event(Event.SHOW, relatedTarget);
+
+      $(parent).trigger(showEvent);
+
+      if (showEvent.isDefaultPrevented()) {
+        return false;
+      }
+
+      this.focus();
+      this.setAttribute('aria-expanded', true);
+
+      $(parent).toggleClass(ClassName.SHOW);
+      $(parent).trigger($.Event(Event.SHOWN, relatedTarget));
+
+      return false;
+    };
+
+    Dropdown.prototype.dispose = function dispose() {
+      $.removeData(this._element, DATA_KEY);
+      $(this._element).off(EVENT_KEY);
+      this._element = null;
+    };
+
+    // private
+
+    Dropdown.prototype._addEventListeners = function _addEventListeners() {
+      $(this._element).on(Event.CLICK, this.toggle);
+    };
+
+    // static
+
+    Dropdown._jQueryInterface = function _jQueryInterface(config) {
+      return this.each(function () {
+        var data = $(this).data(DATA_KEY);
+
+        if (!data) {
+          data = new Dropdown(this);
+          $(this).data(DATA_KEY, data);
+        }
+
+        if (typeof config === 'string') {
+          if (data[config] === undefined) {
+            throw new Error('No method named "' + config + '"');
+          }
+          data[config].call(this);
+        }
+      });
+    };
+
+    Dropdown._clearMenus = function _clearMenus(event) {
+      if (event && event.which === RIGHT_MOUSE_BUTTON_WHICH) {
+        return;
+      }
+
+      var backdrop = $(Selector.BACKDROP)[0];
+      if (backdrop) {
+        backdrop.parentNode.removeChild(backdrop);
+      }
+
+      var toggles = $.makeArray($(Selector.DATA_TOGGLE));
+
+      for (var i = 0; i < toggles.length; i++) {
+        var parent = Dropdown._getParentFromElement(toggles[i]);
+        var relatedTarget = {
+          relatedTarget: toggles[i]
+        };
+
+        if (!$(parent).hasClass(ClassName.SHOW)) {
+          continue;
+        }
+
+        if (event && (event.type === 'click' && /input|textarea/i.test(event.target.tagName) || event.type === 'focusin') && $.contains(parent, event.target)) {
+          continue;
+        }
+
+        var hideEvent = $.Event(Event.HIDE, relatedTarget);
+        $(parent).trigger(hideEvent);
+        if (hideEvent.isDefaultPrevented()) {
+          continue;
+        }
+
+        toggles[i].setAttribute('aria-expanded', 'false');
+
+        $(parent).removeClass(ClassName.SHOW).trigger($.Event(Event.HIDDEN, relatedTarget));
+      }
+    };
+
+    Dropdown._getParentFromElement = function _getParentFromElement(element) {
+      var parent = void 0;
+      var selector = Util.getSelectorFromElement(element);
+
+      if (selector) {
+        parent = $(selector)[0];
+      }
+
+      return parent || element.parentNode;
+    };
+
+    Dropdown._dataApiKeydownHandler = function _dataApiKeydownHandler(event) {
+      if (!/(38|40|27|32)/.test(event.which) || /input|textarea/i.test(event.target.tagName)) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (this.disabled || $(this).hasClass(ClassName.DISABLED)) {
+        return;
+      }
+
+      var parent = Dropdown._getParentFromElement(this);
+      var isActive = $(parent).hasClass(ClassName.SHOW);
+
+      if (!isActive && event.which !== ESCAPE_KEYCODE || isActive && event.which === ESCAPE_KEYCODE) {
+
+        if (event.which === ESCAPE_KEYCODE) {
+          var toggle = $(parent).find(Selector.DATA_TOGGLE)[0];
+          $(toggle).trigger('focus');
+        }
+
+        $(this).trigger('click');
+        return;
+      }
+
+      var items = $(parent).find(Selector.VISIBLE_ITEMS).get();
+
+      if (!items.length) {
+        return;
+      }
+
+      var index = items.indexOf(event.target);
+
+      if (event.which === ARROW_UP_KEYCODE && index > 0) {
+        // up
+        index--;
+      }
+
+      if (event.which === ARROW_DOWN_KEYCODE && index < items.length - 1) {
+        // down
+        index++;
+      }
+
+      if (index < 0) {
+        index = 0;
+      }
+
+      items[index].focus();
+    };
+
+    _createClass(Dropdown, null, [{
+      key: 'VERSION',
+      get: function get() {
+        return VERSION;
+      }
+    }]);
+
+    return Dropdown;
+  }();
+
+  /**
+   * ------------------------------------------------------------------------
+   * Data Api implementation
+   * ------------------------------------------------------------------------
+   */
+
+  $(document).on(Event.KEYDOWN_DATA_API, Selector.DATA_TOGGLE, Dropdown._dataApiKeydownHandler).on(Event.KEYDOWN_DATA_API, Selector.ROLE_MENU, Dropdown._dataApiKeydownHandler).on(Event.KEYDOWN_DATA_API, Selector.ROLE_LISTBOX, Dropdown._dataApiKeydownHandler).on(Event.CLICK_DATA_API + ' ' + Event.FOCUSIN_DATA_API, Dropdown._clearMenus).on(Event.CLICK_DATA_API, Selector.DATA_TOGGLE, Dropdown.prototype.toggle).on(Event.CLICK_DATA_API, Selector.FORM_CHILD, function (e) {
+    e.stopPropagation();
+  });
+
+  /**
+   * ------------------------------------------------------------------------
+   * jQuery
+   * ------------------------------------------------------------------------
+   */
+
+  $.fn[NAME] = Dropdown._jQueryInterface;
+  $.fn[NAME].Constructor = Dropdown;
+  $.fn[NAME].noConflict = function () {
+    $.fn[NAME] = JQUERY_NO_CONFLICT;
+    return Dropdown._jQueryInterface;
+  };
+
+  return Dropdown;
+}(jQuery);
+
+/**
+ * --------------------------------------------------------------------------
+ * Bootstrap (v4.0.0-alpha.6): modal.js
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * --------------------------------------------------------------------------
+ */
+
+var Modal = function ($) {
+
+  /**
+   * ------------------------------------------------------------------------
+   * Constants
+   * ------------------------------------------------------------------------
+   */
+
+  var NAME = 'modal';
+  var VERSION = '4.0.0-alpha.6';
+  var DATA_KEY = 'bs.modal';
+  var EVENT_KEY = '.' + DATA_KEY;
+  var DATA_API_KEY = '.data-api';
+  var JQUERY_NO_CONFLICT = $.fn[NAME];
+  var TRANSITION_DURATION = 300;
+  var BACKDROP_TRANSITION_DURATION = 150;
+  var ESCAPE_KEYCODE = 27; // KeyboardEvent.which value for Escape (Esc) key
+
+  var Default = {
+    backdrop: true,
+    keyboard: true,
+    focus: true,
+    show: true
+  };
+
+  var DefaultType = {
+    backdrop: '(boolean|string)',
+    keyboard: 'boolean',
+    focus: 'boolean',
+    show: 'boolean'
+  };
+
+  var Event = {
+    HIDE: 'hide' + EVENT_KEY,
+    HIDDEN: 'hidden' + EVENT_KEY,
+    SHOW: 'show' + EVENT_KEY,
+    SHOWN: 'shown' + EVENT_KEY,
+    FOCUSIN: 'focusin' + EVENT_KEY,
+    RESIZE: 'resize' + EVENT_KEY,
+    CLICK_DISMISS: 'click.dismiss' + EVENT_KEY,
+    KEYDOWN_DISMISS: 'keydown.dismiss' + EVENT_KEY,
+    MOUSEUP_DISMISS: 'mouseup.dismiss' + EVENT_KEY,
+    MOUSEDOWN_DISMISS: 'mousedown.dismiss' + EVENT_KEY,
+    CLICK_DATA_API: 'click' + EVENT_KEY + DATA_API_KEY
+  };
+
+  var ClassName = {
+    SCROLLBAR_MEASURER: 'modal-scrollbar-measure',
+    BACKDROP: 'modal-backdrop',
+    OPEN: 'modal-open',
+    FADE: 'fade',
+    SHOW: 'show'
+  };
+
+  var Selector = {
+    DIALOG: '.modal-dialog',
+    DATA_TOGGLE: '[data-toggle="modal"]',
+    DATA_DISMISS: '[data-dismiss="modal"]',
+    FIXED_CONTENT: '.fixed-top, .fixed-bottom, .is-fixed, .sticky-top'
+  };
+
+  /**
+   * ------------------------------------------------------------------------
+   * Class Definition
+   * ------------------------------------------------------------------------
+   */
+
+  var Modal = function () {
+    function Modal(element, config) {
+      _classCallCheck(this, Modal);
+
+      this._config = this._getConfig(config);
+      this._element = element;
+      this._dialog = $(element).find(Selector.DIALOG)[0];
+      this._backdrop = null;
+      this._isShown = false;
+      this._isBodyOverflowing = false;
+      this._ignoreBackdropClick = false;
+      this._isTransitioning = false;
+      this._originalBodyPadding = 0;
+      this._scrollbarWidth = 0;
+    }
+
+    // getters
+
+    // public
+
+    Modal.prototype.toggle = function toggle(relatedTarget) {
+      return this._isShown ? this.hide() : this.show(relatedTarget);
+    };
+
+    Modal.prototype.show = function show(relatedTarget) {
+      var _this9 = this;
+
+      if (this._isTransitioning) {
+        throw new Error('Modal is transitioning');
+      }
+
+      if (Util.supportsTransitionEnd() && $(this._element).hasClass(ClassName.FADE)) {
+        this._isTransitioning = true;
+      }
+      var showEvent = $.Event(Event.SHOW, {
+        relatedTarget: relatedTarget
+      });
+
+      $(this._element).trigger(showEvent);
+
+      if (this._isShown || showEvent.isDefaultPrevented()) {
+        return;
+      }
+
+      this._isShown = true;
+
+      this._checkScrollbar();
+      this._setScrollbar();
+
+      $(document.body).addClass(ClassName.OPEN);
+
+      this._setEscapeEvent();
+      this._setResizeEvent();
+
+      $(this._element).on(Event.CLICK_DISMISS, Selector.DATA_DISMISS, function (event) {
+        return _this9.hide(event);
+      });
+
+      $(this._dialog).on(Event.MOUSEDOWN_DISMISS, function () {
+        $(_this9._element).one(Event.MOUSEUP_DISMISS, function (event) {
+          if ($(event.target).is(_this9._element)) {
+            _this9._ignoreBackdropClick = true;
+          }
+        });
+      });
+
+      this._showBackdrop(function () {
+        return _this9._showElement(relatedTarget);
+      });
+    };
+
+    Modal.prototype.hide = function hide(event) {
+      var _this10 = this;
+
+      if (event) {
+        event.preventDefault();
+      }
+
+      if (this._isTransitioning) {
+        throw new Error('Modal is transitioning');
+      }
+
+      var transition = Util.supportsTransitionEnd() && $(this._element).hasClass(ClassName.FADE);
+      if (transition) {
+        this._isTransitioning = true;
+      }
+
+      var hideEvent = $.Event(Event.HIDE);
+      $(this._element).trigger(hideEvent);
+
+      if (!this._isShown || hideEvent.isDefaultPrevented()) {
+        return;
+      }
+
+      this._isShown = false;
+
+      this._setEscapeEvent();
+      this._setResizeEvent();
+
+      $(document).off(Event.FOCUSIN);
+
+      $(this._element).removeClass(ClassName.SHOW);
+
+      $(this._element).off(Event.CLICK_DISMISS);
+      $(this._dialog).off(Event.MOUSEDOWN_DISMISS);
+
+      if (transition) {
+        $(this._element).one(Util.TRANSITION_END, function (event) {
+          return _this10._hideModal(event);
+        }).emulateTransitionEnd(TRANSITION_DURATION);
+      } else {
+        this._hideModal();
+      }
+    };
+
+    Modal.prototype.dispose = function dispose() {
+      $.removeData(this._element, DATA_KEY);
+
+      $(window, document, this._element, this._backdrop).off(EVENT_KEY);
+
+      this._config = null;
+      this._element = null;
+      this._dialog = null;
+      this._backdrop = null;
+      this._isShown = null;
+      this._isBodyOverflowing = null;
+      this._ignoreBackdropClick = null;
+      this._originalBodyPadding = null;
+      this._scrollbarWidth = null;
+    };
+
+    // private
+
+    Modal.prototype._getConfig = function _getConfig(config) {
+      config = $.extend({}, Default, config);
+      Util.typeCheckConfig(NAME, config, DefaultType);
+      return config;
+    };
+
+    Modal.prototype._showElement = function _showElement(relatedTarget) {
+      var _this11 = this;
+
+      var transition = Util.supportsTransitionEnd() && $(this._element).hasClass(ClassName.FADE);
+
+      if (!this._element.parentNode || this._element.parentNode.nodeType !== Node.ELEMENT_NODE) {
+        // don't move modals dom position
+        document.body.appendChild(this._element);
+      }
+
+      this._element.style.display = 'block';
+      this._element.removeAttribute('aria-hidden');
+      this._element.scrollTop = 0;
+
+      if (transition) {
+        Util.reflow(this._element);
+      }
+
+      $(this._element).addClass(ClassName.SHOW);
+
+      if (this._config.focus) {
+        this._enforceFocus();
+      }
+
+      var shownEvent = $.Event(Event.SHOWN, {
+        relatedTarget: relatedTarget
+      });
+
+      var transitionComplete = function transitionComplete() {
+        if (_this11._config.focus) {
+          _this11._element.focus();
+        }
+        _this11._isTransitioning = false;
+        $(_this11._element).trigger(shownEvent);
+      };
+
+      if (transition) {
+        $(this._dialog).one(Util.TRANSITION_END, transitionComplete).emulateTransitionEnd(TRANSITION_DURATION);
+      } else {
+        transitionComplete();
+      }
+    };
+
+    Modal.prototype._enforceFocus = function _enforceFocus() {
+      var _this12 = this;
+
+      $(document).off(Event.FOCUSIN) // guard against infinite focus loop
+      .on(Event.FOCUSIN, function (event) {
+        if (document !== event.target && _this12._element !== event.target && !$(_this12._element).has(event.target).length) {
+          _this12._element.focus();
+        }
+      });
+    };
+
+    Modal.prototype._setEscapeEvent = function _setEscapeEvent() {
+      var _this13 = this;
+
+      if (this._isShown && this._config.keyboard) {
+        $(this._element).on(Event.KEYDOWN_DISMISS, function (event) {
+          if (event.which === ESCAPE_KEYCODE) {
+            _this13.hide();
+          }
+        });
+      } else if (!this._isShown) {
+        $(this._element).off(Event.KEYDOWN_DISMISS);
+      }
+    };
+
+    Modal.prototype._setResizeEvent = function _setResizeEvent() {
+      var _this14 = this;
+
+      if (this._isShown) {
+        $(window).on(Event.RESIZE, function (event) {
+          return _this14._handleUpdate(event);
+        });
+      } else {
+        $(window).off(Event.RESIZE);
+      }
+    };
+
+    Modal.prototype._hideModal = function _hideModal() {
+      var _this15 = this;
+
+      this._element.style.display = 'none';
+      this._element.setAttribute('aria-hidden', 'true');
+      this._isTransitioning = false;
+      this._showBackdrop(function () {
+        $(document.body).removeClass(ClassName.OPEN);
+        _this15._resetAdjustments();
+        _this15._resetScrollbar();
+        $(_this15._element).trigger(Event.HIDDEN);
+      });
+    };
+
+    Modal.prototype._removeBackdrop = function _removeBackdrop() {
+      if (this._backdrop) {
+        $(this._backdrop).remove();
+        this._backdrop = null;
+      }
+    };
+
+    Modal.prototype._showBackdrop = function _showBackdrop(callback) {
+      var _this16 = this;
+
+      var animate = $(this._element).hasClass(ClassName.FADE) ? ClassName.FADE : '';
+
+      if (this._isShown && this._config.backdrop) {
+        var doAnimate = Util.supportsTransitionEnd() && animate;
+
+        this._backdrop = document.createElement('div');
+        this._backdrop.className = ClassName.BACKDROP;
+
+        if (animate) {
+          $(this._backdrop).addClass(animate);
+        }
+
+        $(this._backdrop).appendTo(document.body);
+
+        $(this._element).on(Event.CLICK_DISMISS, function (event) {
+          if (_this16._ignoreBackdropClick) {
+            _this16._ignoreBackdropClick = false;
+            return;
+          }
+          if (event.target !== event.currentTarget) {
+            return;
+          }
+          if (_this16._config.backdrop === 'static') {
+            _this16._element.focus();
+          } else {
+            _this16.hide();
+          }
+        });
+
+        if (doAnimate) {
+          Util.reflow(this._backdrop);
+        }
+
+        $(this._backdrop).addClass(ClassName.SHOW);
+
+        if (!callback) {
+          return;
+        }
+
+        if (!doAnimate) {
+          callback();
+          return;
+        }
+
+        $(this._backdrop).one(Util.TRANSITION_END, callback).emulateTransitionEnd(BACKDROP_TRANSITION_DURATION);
+      } else if (!this._isShown && this._backdrop) {
+        $(this._backdrop).removeClass(ClassName.SHOW);
+
+        var callbackRemove = function callbackRemove() {
+          _this16._removeBackdrop();
+          if (callback) {
+            callback();
+          }
+        };
+
+        if (Util.supportsTransitionEnd() && $(this._element).hasClass(ClassName.FADE)) {
+          $(this._backdrop).one(Util.TRANSITION_END, callbackRemove).emulateTransitionEnd(BACKDROP_TRANSITION_DURATION);
+        } else {
+          callbackRemove();
+        }
+      } else if (callback) {
+        callback();
+      }
+    };
+
+    // ----------------------------------------------------------------------
+    // the following methods are used to handle overflowing modals
+    // todo (fat): these should probably be refactored out of modal.js
+    // ----------------------------------------------------------------------
+
+    Modal.prototype._handleUpdate = function _handleUpdate() {
+      this._adjustDialog();
+    };
+
+    Modal.prototype._adjustDialog = function _adjustDialog() {
+      var isModalOverflowing = this._element.scrollHeight > document.documentElement.clientHeight;
+
+      if (!this._isBodyOverflowing && isModalOverflowing) {
+        this._element.style.paddingLeft = this._scrollbarWidth + 'px';
+      }
+
+      if (this._isBodyOverflowing && !isModalOverflowing) {
+        this._element.style.paddingRight = this._scrollbarWidth + 'px';
+      }
+    };
+
+    Modal.prototype._resetAdjustments = function _resetAdjustments() {
+      this._element.style.paddingLeft = '';
+      this._element.style.paddingRight = '';
+    };
+
+    Modal.prototype._checkScrollbar = function _checkScrollbar() {
+      this._isBodyOverflowing = document.body.clientWidth < window.innerWidth;
+      this._scrollbarWidth = this._getScrollbarWidth();
+    };
+
+    Modal.prototype._setScrollbar = function _setScrollbar() {
+      var bodyPadding = parseInt($(Selector.FIXED_CONTENT).css('padding-right') || 0, 10);
+
+      this._originalBodyPadding = document.body.style.paddingRight || '';
+
+      if (this._isBodyOverflowing) {
+        document.body.style.paddingRight = bodyPadding + this._scrollbarWidth + 'px';
+      }
+    };
+
+    Modal.prototype._resetScrollbar = function _resetScrollbar() {
+      document.body.style.paddingRight = this._originalBodyPadding;
+    };
+
+    Modal.prototype._getScrollbarWidth = function _getScrollbarWidth() {
+      // thx d.walsh
+      var scrollDiv = document.createElement('div');
+      scrollDiv.className = ClassName.SCROLLBAR_MEASURER;
+      document.body.appendChild(scrollDiv);
+      var scrollbarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth;
+      document.body.removeChild(scrollDiv);
+      return scrollbarWidth;
+    };
+
+    // static
+
+    Modal._jQueryInterface = function _jQueryInterface(config, relatedTarget) {
+      return this.each(function () {
+        var data = $(this).data(DATA_KEY);
+        var _config = $.extend({}, Modal.Default, $(this).data(), (typeof config === 'undefined' ? 'undefined' : _typeof(config)) === 'object' && config);
+
+        if (!data) {
+          data = new Modal(this, _config);
+          $(this).data(DATA_KEY, data);
+        }
+
+        if (typeof config === 'string') {
+          if (data[config] === undefined) {
+            throw new Error('No method named "' + config + '"');
+          }
+          data[config](relatedTarget);
+        } else if (_config.show) {
+          data.show(relatedTarget);
+        }
+      });
+    };
+
+    _createClass(Modal, null, [{
+      key: 'VERSION',
+      get: function get() {
+        return VERSION;
+      }
+    }, {
+      key: 'Default',
+      get: function get() {
+        return Default;
+      }
+    }]);
+
+    return Modal;
+  }();
+
+  /**
+   * ------------------------------------------------------------------------
+   * Data Api implementation
+   * ------------------------------------------------------------------------
+   */
+
+  $(document).on(Event.CLICK_DATA_API, Selector.DATA_TOGGLE, function (event) {
+    var _this17 = this;
+
+    var target = void 0;
+    var selector = Util.getSelectorFromElement(this);
+
+    if (selector) {
+      target = $(selector)[0];
+    }
+
+    var config = $(target).data(DATA_KEY) ? 'toggle' : $.extend({}, $(target).data(), $(this).data());
+
+    if (this.tagName === 'A' || this.tagName === 'AREA') {
+      event.preventDefault();
+    }
+
+    var $target = $(target).one(Event.SHOW, function (showEvent) {
+      if (showEvent.isDefaultPrevented()) {
+        // only register focus restorer if modal will actually get shown
+        return;
+      }
+
+      $target.one(Event.HIDDEN, function () {
+        if ($(_this17).is(':visible')) {
+          _this17.focus();
+        }
+      });
+    });
+
+    Modal._jQueryInterface.call($(target), config, this);
+  });
+
+  /**
+   * ------------------------------------------------------------------------
+   * jQuery
+   * ------------------------------------------------------------------------
+   */
+
+  $.fn[NAME] = Modal._jQueryInterface;
+  $.fn[NAME].Constructor = Modal;
+  $.fn[NAME].noConflict = function () {
+    $.fn[NAME] = JQUERY_NO_CONFLICT;
+    return Modal._jQueryInterface;
+  };
+
+  return Modal;
+}(jQuery);
+
+/**
+ * --------------------------------------------------------------------------
+ * Bootstrap (v4.0.0-alpha.6): scrollspy.js
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * --------------------------------------------------------------------------
+ */
+
+var ScrollSpy = function ($) {
+
+  /**
+   * ------------------------------------------------------------------------
+   * Constants
+   * ------------------------------------------------------------------------
+   */
+
+  var NAME = 'scrollspy';
+  var VERSION = '4.0.0-alpha.6';
+  var DATA_KEY = 'bs.scrollspy';
+  var EVENT_KEY = '.' + DATA_KEY;
+  var DATA_API_KEY = '.data-api';
+  var JQUERY_NO_CONFLICT = $.fn[NAME];
+
+  var Default = {
+    offset: 10,
+    method: 'auto',
+    target: ''
+  };
+
+  var DefaultType = {
+    offset: 'number',
+    method: 'string',
+    target: '(string|element)'
+  };
+
+  var Event = {
+    ACTIVATE: 'activate' + EVENT_KEY,
+    SCROLL: 'scroll' + EVENT_KEY,
+    LOAD_DATA_API: 'load' + EVENT_KEY + DATA_API_KEY
+  };
+
+  var ClassName = {
+    DROPDOWN_ITEM: 'dropdown-item',
+    DROPDOWN_MENU: 'dropdown-menu',
+    NAV_LINK: 'nav-link',
+    NAV: 'nav',
+    ACTIVE: 'active'
+  };
+
+  var Selector = {
+    DATA_SPY: '[data-spy="scroll"]',
+    ACTIVE: '.active',
+    LIST_ITEM: '.list-item',
+    LI: 'li',
+    LI_DROPDOWN: 'li.dropdown',
+    NAV_LINKS: '.nav-link',
+    DROPDOWN: '.dropdown',
+    DROPDOWN_ITEMS: '.dropdown-item',
+    DROPDOWN_TOGGLE: '.dropdown-toggle'
+  };
+
+  var OffsetMethod = {
+    OFFSET: 'offset',
+    POSITION: 'position'
+  };
+
+  /**
+   * ------------------------------------------------------------------------
+   * Class Definition
+   * ------------------------------------------------------------------------
+   */
+
+  var ScrollSpy = function () {
+    function ScrollSpy(element, config) {
+      var _this18 = this;
+
+      _classCallCheck(this, ScrollSpy);
+
+      this._element = element;
+      this._scrollElement = element.tagName === 'BODY' ? window : element;
+      this._config = this._getConfig(config);
+      this._selector = this._config.target + ' ' + Selector.NAV_LINKS + ',' + (this._config.target + ' ' + Selector.DROPDOWN_ITEMS);
+      this._offsets = [];
+      this._targets = [];
+      this._activeTarget = null;
+      this._scrollHeight = 0;
+
+      $(this._scrollElement).on(Event.SCROLL, function (event) {
+        return _this18._process(event);
+      });
+
+      this.refresh();
+      this._process();
+    }
+
+    // getters
+
+    // public
+
+    ScrollSpy.prototype.refresh = function refresh() {
+      var _this19 = this;
+
+      var autoMethod = this._scrollElement !== this._scrollElement.window ? OffsetMethod.POSITION : OffsetMethod.OFFSET;
+
+      var offsetMethod = this._config.method === 'auto' ? autoMethod : this._config.method;
+
+      var offsetBase = offsetMethod === OffsetMethod.POSITION ? this._getScrollTop() : 0;
+
+      this._offsets = [];
+      this._targets = [];
+
+      this._scrollHeight = this._getScrollHeight();
+
+      var targets = $.makeArray($(this._selector));
+
+      targets.map(function (element) {
+        var target = void 0;
+        var targetSelector = Util.getSelectorFromElement(element);
+
+        if (targetSelector) {
+          target = $(targetSelector)[0];
+        }
+
+        if (target && (target.offsetWidth || target.offsetHeight)) {
+          // todo (fat): remove sketch reliance on jQuery position/offset
+          return [$(target)[offsetMethod]().top + offsetBase, targetSelector];
+        }
+        return null;
+      }).filter(function (item) {
+        return item;
+      }).sort(function (a, b) {
+        return a[0] - b[0];
+      }).forEach(function (item) {
+        _this19._offsets.push(item[0]);
+        _this19._targets.push(item[1]);
+      });
+    };
+
+    ScrollSpy.prototype.dispose = function dispose() {
+      $.removeData(this._element, DATA_KEY);
+      $(this._scrollElement).off(EVENT_KEY);
+
+      this._element = null;
+      this._scrollElement = null;
+      this._config = null;
+      this._selector = null;
+      this._offsets = null;
+      this._targets = null;
+      this._activeTarget = null;
+      this._scrollHeight = null;
+    };
+
+    // private
+
+    ScrollSpy.prototype._getConfig = function _getConfig(config) {
+      config = $.extend({}, Default, config);
+
+      if (typeof config.target !== 'string') {
+        var id = $(config.target).attr('id');
+        if (!id) {
+          id = Util.getUID(NAME);
+          $(config.target).attr('id', id);
+        }
+        config.target = '#' + id;
+      }
+
+      Util.typeCheckConfig(NAME, config, DefaultType);
+
+      return config;
+    };
+
+    ScrollSpy.prototype._getScrollTop = function _getScrollTop() {
+      return this._scrollElement === window ? this._scrollElement.pageYOffset : this._scrollElement.scrollTop;
+    };
+
+    ScrollSpy.prototype._getScrollHeight = function _getScrollHeight() {
+      return this._scrollElement.scrollHeight || Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+    };
+
+    ScrollSpy.prototype._getOffsetHeight = function _getOffsetHeight() {
+      return this._scrollElement === window ? window.innerHeight : this._scrollElement.offsetHeight;
+    };
+
+    ScrollSpy.prototype._process = function _process() {
+      var scrollTop = this._getScrollTop() + this._config.offset;
+      var scrollHeight = this._getScrollHeight();
+      var maxScroll = this._config.offset + scrollHeight - this._getOffsetHeight();
+
+      if (this._scrollHeight !== scrollHeight) {
+        this.refresh();
+      }
+
+      if (scrollTop >= maxScroll) {
+        var target = this._targets[this._targets.length - 1];
+
+        if (this._activeTarget !== target) {
+          this._activate(target);
+        }
+        return;
+      }
+
+      if (this._activeTarget && scrollTop < this._offsets[0] && this._offsets[0] > 0) {
+        this._activeTarget = null;
+        this._clear();
+        return;
+      }
+
+      for (var i = this._offsets.length; i--;) {
+        var isActiveTarget = this._activeTarget !== this._targets[i] && scrollTop >= this._offsets[i] && (this._offsets[i + 1] === undefined || scrollTop < this._offsets[i + 1]);
+
+        if (isActiveTarget) {
+          this._activate(this._targets[i]);
+        }
+      }
+    };
+
+    ScrollSpy.prototype._activate = function _activate(target) {
+      this._activeTarget = target;
+
+      this._clear();
+
+      var queries = this._selector.split(',');
+      queries = queries.map(function (selector) {
+        return selector + '[data-target="' + target + '"],' + (selector + '[href="' + target + '"]');
+      });
+
+      var $link = $(queries.join(','));
+
+      if ($link.hasClass(ClassName.DROPDOWN_ITEM)) {
+        $link.closest(Selector.DROPDOWN).find(Selector.DROPDOWN_TOGGLE).addClass(ClassName.ACTIVE);
+        $link.addClass(ClassName.ACTIVE);
+      } else {
+        // todo (fat) this is kinda sus...
+        // recursively add actives to tested nav-links
+        $link.parents(Selector.LI).find('> ' + Selector.NAV_LINKS).addClass(ClassName.ACTIVE);
+      }
+
+      $(this._scrollElement).trigger(Event.ACTIVATE, {
+        relatedTarget: target
+      });
+    };
+
+    ScrollSpy.prototype._clear = function _clear() {
+      $(this._selector).filter(Selector.ACTIVE).removeClass(ClassName.ACTIVE);
+    };
+
+    // static
+
+    ScrollSpy._jQueryInterface = function _jQueryInterface(config) {
+      return this.each(function () {
+        var data = $(this).data(DATA_KEY);
+        var _config = (typeof config === 'undefined' ? 'undefined' : _typeof(config)) === 'object' && config;
+
+        if (!data) {
+          data = new ScrollSpy(this, _config);
+          $(this).data(DATA_KEY, data);
+        }
+
+        if (typeof config === 'string') {
+          if (data[config] === undefined) {
+            throw new Error('No method named "' + config + '"');
+          }
+          data[config]();
+        }
+      });
+    };
+
+    _createClass(ScrollSpy, null, [{
+      key: 'VERSION',
+      get: function get() {
+        return VERSION;
+      }
+    }, {
+      key: 'Default',
+      get: function get() {
+        return Default;
+      }
+    }]);
+
+    return ScrollSpy;
+  }();
+
+  /**
+   * ------------------------------------------------------------------------
+   * Data Api implementation
+   * ------------------------------------------------------------------------
+   */
+
+  $(window).on(Event.LOAD_DATA_API, function () {
+    var scrollSpys = $.makeArray($(Selector.DATA_SPY));
+
+    for (var i = scrollSpys.length; i--;) {
+      var $spy = $(scrollSpys[i]);
+      ScrollSpy._jQueryInterface.call($spy, $spy.data());
+    }
+  });
+
+  /**
+   * ------------------------------------------------------------------------
+   * jQuery
+   * ------------------------------------------------------------------------
+   */
+
+  $.fn[NAME] = ScrollSpy._jQueryInterface;
+  $.fn[NAME].Constructor = ScrollSpy;
+  $.fn[NAME].noConflict = function () {
+    $.fn[NAME] = JQUERY_NO_CONFLICT;
+    return ScrollSpy._jQueryInterface;
+  };
+
+  return ScrollSpy;
+}(jQuery);
+
+/**
+ * --------------------------------------------------------------------------
+ * Bootstrap (v4.0.0-alpha.6): tab.js
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * --------------------------------------------------------------------------
+ */
+
+var Tab = function ($) {
+
+  /**
+   * ------------------------------------------------------------------------
+   * Constants
+   * ------------------------------------------------------------------------
+   */
+
+  var NAME = 'tab';
+  var VERSION = '4.0.0-alpha.6';
+  var DATA_KEY = 'bs.tab';
+  var EVENT_KEY = '.' + DATA_KEY;
+  var DATA_API_KEY = '.data-api';
+  var JQUERY_NO_CONFLICT = $.fn[NAME];
+  var TRANSITION_DURATION = 150;
+
+  var Event = {
+    HIDE: 'hide' + EVENT_KEY,
+    HIDDEN: 'hidden' + EVENT_KEY,
+    SHOW: 'show' + EVENT_KEY,
+    SHOWN: 'shown' + EVENT_KEY,
+    CLICK_DATA_API: 'click' + EVENT_KEY + DATA_API_KEY
+  };
+
+  var ClassName = {
+    DROPDOWN_MENU: 'dropdown-menu',
+    ACTIVE: 'active',
+    DISABLED: 'disabled',
+    FADE: 'fade',
+    SHOW: 'show'
+  };
+
+  var Selector = {
+    A: 'a',
+    LI: 'li',
+    DROPDOWN: '.dropdown',
+    LIST: 'ul:not(.dropdown-menu), ol:not(.dropdown-menu), nav:not(.dropdown-menu)',
+    FADE_CHILD: '> .nav-item .fade, > .fade',
+    ACTIVE: '.active',
+    ACTIVE_CHILD: '> .nav-item > .active, > .active',
+    DATA_TOGGLE: '[data-toggle="tab"], [data-toggle="pill"]',
+    DROPDOWN_TOGGLE: '.dropdown-toggle',
+    DROPDOWN_ACTIVE_CHILD: '> .dropdown-menu .active'
+  };
+
+  /**
+   * ------------------------------------------------------------------------
+   * Class Definition
+   * ------------------------------------------------------------------------
+   */
+
+  var Tab = function () {
+    function Tab(element) {
+      _classCallCheck(this, Tab);
+
+      this._element = element;
+    }
+
+    // getters
+
+    // public
+
+    Tab.prototype.show = function show() {
+      var _this20 = this;
+
+      if (this._element.parentNode && this._element.parentNode.nodeType === Node.ELEMENT_NODE && $(this._element).hasClass(ClassName.ACTIVE) || $(this._element).hasClass(ClassName.DISABLED)) {
+        return;
+      }
+
+      var target = void 0;
+      var previous = void 0;
+      var listElement = $(this._element).closest(Selector.LIST)[0];
+      var selector = Util.getSelectorFromElement(this._element);
+
+      if (listElement) {
+        previous = $.makeArray($(listElement).find(Selector.ACTIVE));
+        previous = previous[previous.length - 1];
+      }
+
+      var hideEvent = $.Event(Event.HIDE, {
+        relatedTarget: this._element
+      });
+
+      var showEvent = $.Event(Event.SHOW, {
+        relatedTarget: previous
+      });
+
+      if (previous) {
+        $(previous).trigger(hideEvent);
+      }
+
+      $(this._element).trigger(showEvent);
+
+      if (showEvent.isDefaultPrevented() || hideEvent.isDefaultPrevented()) {
+        return;
+      }
+
+      if (selector) {
+        target = $(selector)[0];
+      }
+
+      this._activate(this._element, listElement);
+
+      var complete = function complete() {
+        var hiddenEvent = $.Event(Event.HIDDEN, {
+          relatedTarget: _this20._element
+        });
+
+        var shownEvent = $.Event(Event.SHOWN, {
+          relatedTarget: previous
+        });
+
+        $(previous).trigger(hiddenEvent);
+        $(_this20._element).trigger(shownEvent);
+      };
+
+      if (target) {
+        this._activate(target, target.parentNode, complete);
+      } else {
+        complete();
+      }
+    };
+
+    Tab.prototype.dispose = function dispose() {
+      $.removeClass(this._element, DATA_KEY);
+      this._element = null;
+    };
+
+    // private
+
+    Tab.prototype._activate = function _activate(element, container, callback) {
+      var _this21 = this;
+
+      var active = $(container).find(Selector.ACTIVE_CHILD)[0];
+      var isTransitioning = callback && Util.supportsTransitionEnd() && (active && $(active).hasClass(ClassName.FADE) || Boolean($(container).find(Selector.FADE_CHILD)[0]));
+
+      var complete = function complete() {
+        return _this21._transitionComplete(element, active, isTransitioning, callback);
+      };
+
+      if (active && isTransitioning) {
+        $(active).one(Util.TRANSITION_END, complete).emulateTransitionEnd(TRANSITION_DURATION);
+      } else {
+        complete();
+      }
+
+      if (active) {
+        $(active).removeClass(ClassName.SHOW);
+      }
+    };
+
+    Tab.prototype._transitionComplete = function _transitionComplete(element, active, isTransitioning, callback) {
+      if (active) {
+        $(active).removeClass(ClassName.ACTIVE);
+
+        var dropdownChild = $(active.parentNode).find(Selector.DROPDOWN_ACTIVE_CHILD)[0];
+
+        if (dropdownChild) {
+          $(dropdownChild).removeClass(ClassName.ACTIVE);
+        }
+
+        active.setAttribute('aria-expanded', false);
+      }
+
+      $(element).addClass(ClassName.ACTIVE);
+      element.setAttribute('aria-expanded', true);
+
+      if (isTransitioning) {
+        Util.reflow(element);
+        $(element).addClass(ClassName.SHOW);
+      } else {
+        $(element).removeClass(ClassName.FADE);
+      }
+
+      if (element.parentNode && $(element.parentNode).hasClass(ClassName.DROPDOWN_MENU)) {
+
+        var dropdownElement = $(element).closest(Selector.DROPDOWN)[0];
+        if (dropdownElement) {
+          $(dropdownElement).find(Selector.DROPDOWN_TOGGLE).addClass(ClassName.ACTIVE);
+        }
+
+        element.setAttribute('aria-expanded', true);
+      }
+
+      if (callback) {
+        callback();
+      }
+    };
+
+    // static
+
+    Tab._jQueryInterface = function _jQueryInterface(config) {
+      return this.each(function () {
+        var $this = $(this);
+        var data = $this.data(DATA_KEY);
+
+        if (!data) {
+          data = new Tab(this);
+          $this.data(DATA_KEY, data);
+        }
+
+        if (typeof config === 'string') {
+          if (data[config] === undefined) {
+            throw new Error('No method named "' + config + '"');
+          }
+          data[config]();
+        }
+      });
+    };
+
+    _createClass(Tab, null, [{
+      key: 'VERSION',
+      get: function get() {
+        return VERSION;
+      }
+    }]);
+
+    return Tab;
+  }();
+
+  /**
+   * ------------------------------------------------------------------------
+   * Data Api implementation
+   * ------------------------------------------------------------------------
+   */
+
+  $(document).on(Event.CLICK_DATA_API, Selector.DATA_TOGGLE, function (event) {
+    event.preventDefault();
+    Tab._jQueryInterface.call($(this), 'show');
+  });
+
+  /**
+   * ------------------------------------------------------------------------
+   * jQuery
+   * ------------------------------------------------------------------------
+   */
+
+  $.fn[NAME] = Tab._jQueryInterface;
+  $.fn[NAME].Constructor = Tab;
+  $.fn[NAME].noConflict = function () {
+    $.fn[NAME] = JQUERY_NO_CONFLICT;
+    return Tab._jQueryInterface;
+  };
+
+  return Tab;
+}(jQuery);
+
+/* global Tether */
+
+/**
+ * --------------------------------------------------------------------------
+ * Bootstrap (v4.0.0-alpha.6): tooltip.js
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * --------------------------------------------------------------------------
+ */
+
+var Tooltip = function ($) {
+
+  /**
+   * Check for Tether dependency
+   * Tether - http://tether.io/
+   */
+  if (typeof Tether === 'undefined') {
+    throw new Error('Bootstrap tooltips require Tether (http://tether.io/)');
+  }
+
+  /**
+   * ------------------------------------------------------------------------
+   * Constants
+   * ------------------------------------------------------------------------
+   */
+
+  var NAME = 'tooltip';
+  var VERSION = '4.0.0-alpha.6';
+  var DATA_KEY = 'bs.tooltip';
+  var EVENT_KEY = '.' + DATA_KEY;
+  var JQUERY_NO_CONFLICT = $.fn[NAME];
+  var TRANSITION_DURATION = 150;
+  var CLASS_PREFIX = 'bs-tether';
+
+  var Default = {
+    animation: true,
+    template: '<div class="tooltip" role="tooltip">' + '<div class="tooltip-inner"></div></div>',
+    trigger: 'hover focus',
+    title: '',
+    delay: 0,
+    html: false,
+    selector: false,
+    placement: 'top',
+    offset: '0 0',
+    constraints: [],
+    container: false
+  };
+
+  var DefaultType = {
+    animation: 'boolean',
+    template: 'string',
+    title: '(string|element|function)',
+    trigger: 'string',
+    delay: '(number|object)',
+    html: 'boolean',
+    selector: '(string|boolean)',
+    placement: '(string|function)',
+    offset: 'string',
+    constraints: 'array',
+    container: '(string|element|boolean)'
+  };
+
+  var AttachmentMap = {
+    TOP: 'bottom center',
+    RIGHT: 'middle left',
+    BOTTOM: 'top center',
+    LEFT: 'middle right'
+  };
+
+  var HoverState = {
+    SHOW: 'show',
+    OUT: 'out'
+  };
+
+  var Event = {
+    HIDE: 'hide' + EVENT_KEY,
+    HIDDEN: 'hidden' + EVENT_KEY,
+    SHOW: 'show' + EVENT_KEY,
+    SHOWN: 'shown' + EVENT_KEY,
+    INSERTED: 'inserted' + EVENT_KEY,
+    CLICK: 'click' + EVENT_KEY,
+    FOCUSIN: 'focusin' + EVENT_KEY,
+    FOCUSOUT: 'focusout' + EVENT_KEY,
+    MOUSEENTER: 'mouseenter' + EVENT_KEY,
+    MOUSELEAVE: 'mouseleave' + EVENT_KEY
+  };
+
+  var ClassName = {
+    FADE: 'fade',
+    SHOW: 'show'
+  };
+
+  var Selector = {
+    TOOLTIP: '.tooltip',
+    TOOLTIP_INNER: '.tooltip-inner'
+  };
+
+  var TetherClass = {
+    element: false,
+    enabled: false
+  };
+
+  var Trigger = {
+    HOVER: 'hover',
+    FOCUS: 'focus',
+    CLICK: 'click',
+    MANUAL: 'manual'
+  };
+
+  /**
+   * ------------------------------------------------------------------------
+   * Class Definition
+   * ------------------------------------------------------------------------
+   */
+
+  var Tooltip = function () {
+    function Tooltip(element, config) {
+      _classCallCheck(this, Tooltip);
+
+      // private
+      this._isEnabled = true;
+      this._timeout = 0;
+      this._hoverState = '';
+      this._activeTrigger = {};
+      this._isTransitioning = false;
+      this._tether = null;
+
+      // protected
+      this.element = element;
+      this.config = this._getConfig(config);
+      this.tip = null;
+
+      this._setListeners();
+    }
+
+    // getters
+
+    // public
+
+    Tooltip.prototype.enable = function enable() {
+      this._isEnabled = true;
+    };
+
+    Tooltip.prototype.disable = function disable() {
+      this._isEnabled = false;
+    };
+
+    Tooltip.prototype.toggleEnabled = function toggleEnabled() {
+      this._isEnabled = !this._isEnabled;
+    };
+
+    Tooltip.prototype.toggle = function toggle(event) {
+      if (event) {
+        var dataKey = this.constructor.DATA_KEY;
+        var context = $(event.currentTarget).data(dataKey);
+
+        if (!context) {
+          context = new this.constructor(event.currentTarget, this._getDelegateConfig());
+          $(event.currentTarget).data(dataKey, context);
+        }
+
+        context._activeTrigger.click = !context._activeTrigger.click;
+
+        if (context._isWithActiveTrigger()) {
+          context._enter(null, context);
+        } else {
+          context._leave(null, context);
+        }
+      } else {
+
+        if ($(this.getTipElement()).hasClass(ClassName.SHOW)) {
+          this._leave(null, this);
+          return;
+        }
+
+        this._enter(null, this);
+      }
+    };
+
+    Tooltip.prototype.dispose = function dispose() {
+      clearTimeout(this._timeout);
+
+      this.cleanupTether();
+
+      $.removeData(this.element, this.constructor.DATA_KEY);
+
+      $(this.element).off(this.constructor.EVENT_KEY);
+      $(this.element).closest('.modal').off('hide.bs.modal');
+
+      if (this.tip) {
+        $(this.tip).remove();
+      }
+
+      this._isEnabled = null;
+      this._timeout = null;
+      this._hoverState = null;
+      this._activeTrigger = null;
+      this._tether = null;
+
+      this.element = null;
+      this.config = null;
+      this.tip = null;
+    };
+
+    Tooltip.prototype.show = function show() {
+      var _this22 = this;
+
+      if ($(this.element).css('display') === 'none') {
+        throw new Error('Please use show on visible elements');
+      }
+
+      var showEvent = $.Event(this.constructor.Event.SHOW);
+      if (this.isWithContent() && this._isEnabled) {
+        if (this._isTransitioning) {
+          throw new Error('Tooltip is transitioning');
+        }
+        $(this.element).trigger(showEvent);
+
+        var isInTheDom = $.contains(this.element.ownerDocument.documentElement, this.element);
+
+        if (showEvent.isDefaultPrevented() || !isInTheDom) {
+          return;
+        }
+
+        var tip = this.getTipElement();
+        var tipId = Util.getUID(this.constructor.NAME);
+
+        tip.setAttribute('id', tipId);
+        this.element.setAttribute('aria-describedby', tipId);
+
+        this.setContent();
+
+        if (this.config.animation) {
+          $(tip).addClass(ClassName.FADE);
+        }
+
+        var placement = typeof this.config.placement === 'function' ? this.config.placement.call(this, tip, this.element) : this.config.placement;
+
+        var attachment = this._getAttachment(placement);
+
+        var container = this.config.container === false ? document.body : $(this.config.container);
+
+        $(tip).data(this.constructor.DATA_KEY, this).appendTo(container);
+
+        $(this.element).trigger(this.constructor.Event.INSERTED);
+
+        this._tether = new Tether({
+          attachment: attachment,
+          element: tip,
+          target: this.element,
+          classes: TetherClass,
+          classPrefix: CLASS_PREFIX,
+          offset: this.config.offset,
+          constraints: this.config.constraints,
+          addTargetClasses: false
+        });
+
+        Util.reflow(tip);
+        this._tether.position();
+
+        $(tip).addClass(ClassName.SHOW);
+
+        var complete = function complete() {
+          var prevHoverState = _this22._hoverState;
+          _this22._hoverState = null;
+          _this22._isTransitioning = false;
+
+          $(_this22.element).trigger(_this22.constructor.Event.SHOWN);
+
+          if (prevHoverState === HoverState.OUT) {
+            _this22._leave(null, _this22);
+          }
+        };
+
+        if (Util.supportsTransitionEnd() && $(this.tip).hasClass(ClassName.FADE)) {
+          this._isTransitioning = true;
+          $(this.tip).one(Util.TRANSITION_END, complete).emulateTransitionEnd(Tooltip._TRANSITION_DURATION);
+          return;
+        }
+
+        complete();
+      }
+    };
+
+    Tooltip.prototype.hide = function hide(callback) {
+      var _this23 = this;
+
+      var tip = this.getTipElement();
+      var hideEvent = $.Event(this.constructor.Event.HIDE);
+      if (this._isTransitioning) {
+        throw new Error('Tooltip is transitioning');
+      }
+      var complete = function complete() {
+        if (_this23._hoverState !== HoverState.SHOW && tip.parentNode) {
+          tip.parentNode.removeChild(tip);
+        }
+
+        _this23.element.removeAttribute('aria-describedby');
+        $(_this23.element).trigger(_this23.constructor.Event.HIDDEN);
+        _this23._isTransitioning = false;
+        _this23.cleanupTether();
+
+        if (callback) {
+          callback();
+        }
+      };
+
+      $(this.element).trigger(hideEvent);
+
+      if (hideEvent.isDefaultPrevented()) {
+        return;
+      }
+
+      $(tip).removeClass(ClassName.SHOW);
+
+      this._activeTrigger[Trigger.CLICK] = false;
+      this._activeTrigger[Trigger.FOCUS] = false;
+      this._activeTrigger[Trigger.HOVER] = false;
+
+      if (Util.supportsTransitionEnd() && $(this.tip).hasClass(ClassName.FADE)) {
+        this._isTransitioning = true;
+        $(tip).one(Util.TRANSITION_END, complete).emulateTransitionEnd(TRANSITION_DURATION);
+      } else {
+        complete();
+      }
+
+      this._hoverState = '';
+    };
+
+    // protected
+
+    Tooltip.prototype.isWithContent = function isWithContent() {
+      return Boolean(this.getTitle());
+    };
+
+    Tooltip.prototype.getTipElement = function getTipElement() {
+      return this.tip = this.tip || $(this.config.template)[0];
+    };
+
+    Tooltip.prototype.setContent = function setContent() {
+      var $tip = $(this.getTipElement());
+
+      this.setElementContent($tip.find(Selector.TOOLTIP_INNER), this.getTitle());
+
+      $tip.removeClass(ClassName.FADE + ' ' + ClassName.SHOW);
+
+      this.cleanupTether();
+    };
+
+    Tooltip.prototype.setElementContent = function setElementContent($element, content) {
+      var html = this.config.html;
+      if ((typeof content === 'undefined' ? 'undefined' : _typeof(content)) === 'object' && (content.nodeType || content.jquery)) {
+        // content is a DOM node or a jQuery
+        if (html) {
+          if (!$(content).parent().is($element)) {
+            $element.empty().append(content);
+          }
+        } else {
+          $element.text($(content).text());
+        }
+      } else {
+        $element[html ? 'html' : 'text'](content);
+      }
+    };
+
+    Tooltip.prototype.getTitle = function getTitle() {
+      var title = this.element.getAttribute('data-original-title');
+
+      if (!title) {
+        title = typeof this.config.title === 'function' ? this.config.title.call(this.element) : this.config.title;
+      }
+
+      return title;
+    };
+
+    Tooltip.prototype.cleanupTether = function cleanupTether() {
+      if (this._tether) {
+        this._tether.destroy();
+      }
+    };
+
+    // private
+
+    Tooltip.prototype._getAttachment = function _getAttachment(placement) {
+      return AttachmentMap[placement.toUpperCase()];
+    };
+
+    Tooltip.prototype._setListeners = function _setListeners() {
+      var _this24 = this;
+
+      var triggers = this.config.trigger.split(' ');
+
+      triggers.forEach(function (trigger) {
+        if (trigger === 'click') {
+          $(_this24.element).on(_this24.constructor.Event.CLICK, _this24.config.selector, function (event) {
+            return _this24.toggle(event);
+          });
+        } else if (trigger !== Trigger.MANUAL) {
+          var eventIn = trigger === Trigger.HOVER ? _this24.constructor.Event.MOUSEENTER : _this24.constructor.Event.FOCUSIN;
+          var eventOut = trigger === Trigger.HOVER ? _this24.constructor.Event.MOUSELEAVE : _this24.constructor.Event.FOCUSOUT;
+
+          $(_this24.element).on(eventIn, _this24.config.selector, function (event) {
+            return _this24._enter(event);
+          }).on(eventOut, _this24.config.selector, function (event) {
+            return _this24._leave(event);
+          });
+        }
+
+        $(_this24.element).closest('.modal').on('hide.bs.modal', function () {
+          return _this24.hide();
+        });
+      });
+
+      if (this.config.selector) {
+        this.config = $.extend({}, this.config, {
+          trigger: 'manual',
+          selector: ''
+        });
+      } else {
+        this._fixTitle();
+      }
+    };
+
+    Tooltip.prototype._fixTitle = function _fixTitle() {
+      var titleType = _typeof(this.element.getAttribute('data-original-title'));
+      if (this.element.getAttribute('title') || titleType !== 'string') {
+        this.element.setAttribute('data-original-title', this.element.getAttribute('title') || '');
+        this.element.setAttribute('title', '');
+      }
+    };
+
+    Tooltip.prototype._enter = function _enter(event, context) {
+      var dataKey = this.constructor.DATA_KEY;
+
+      context = context || $(event.currentTarget).data(dataKey);
+
+      if (!context) {
+        context = new this.constructor(event.currentTarget, this._getDelegateConfig());
+        $(event.currentTarget).data(dataKey, context);
+      }
+
+      if (event) {
+        context._activeTrigger[event.type === 'focusin' ? Trigger.FOCUS : Trigger.HOVER] = true;
+      }
+
+      if ($(context.getTipElement()).hasClass(ClassName.SHOW) || context._hoverState === HoverState.SHOW) {
+        context._hoverState = HoverState.SHOW;
+        return;
+      }
+
+      clearTimeout(context._timeout);
+
+      context._hoverState = HoverState.SHOW;
+
+      if (!context.config.delay || !context.config.delay.show) {
+        context.show();
+        return;
+      }
+
+      context._timeout = setTimeout(function () {
+        if (context._hoverState === HoverState.SHOW) {
+          context.show();
+        }
+      }, context.config.delay.show);
+    };
+
+    Tooltip.prototype._leave = function _leave(event, context) {
+      var dataKey = this.constructor.DATA_KEY;
+
+      context = context || $(event.currentTarget).data(dataKey);
+
+      if (!context) {
+        context = new this.constructor(event.currentTarget, this._getDelegateConfig());
+        $(event.currentTarget).data(dataKey, context);
+      }
+
+      if (event) {
+        context._activeTrigger[event.type === 'focusout' ? Trigger.FOCUS : Trigger.HOVER] = false;
+      }
+
+      if (context._isWithActiveTrigger()) {
+        return;
+      }
+
+      clearTimeout(context._timeout);
+
+      context._hoverState = HoverState.OUT;
+
+      if (!context.config.delay || !context.config.delay.hide) {
+        context.hide();
+        return;
+      }
+
+      context._timeout = setTimeout(function () {
+        if (context._hoverState === HoverState.OUT) {
+          context.hide();
+        }
+      }, context.config.delay.hide);
+    };
+
+    Tooltip.prototype._isWithActiveTrigger = function _isWithActiveTrigger() {
+      for (var trigger in this._activeTrigger) {
+        if (this._activeTrigger[trigger]) {
+          return true;
+        }
+      }
+
+      return false;
+    };
+
+    Tooltip.prototype._getConfig = function _getConfig(config) {
+      config = $.extend({}, this.constructor.Default, $(this.element).data(), config);
+
+      if (config.delay && typeof config.delay === 'number') {
+        config.delay = {
+          show: config.delay,
+          hide: config.delay
         };
       }
 
-      var typesWithIcons = ['success', 'error', 'warning', 'info'];
-      var $icon = undefined;
+      Util.typeCheckConfig(NAME, config, this.constructor.DefaultType);
 
-      if (typesWithIcons.indexOf(params.type) !== -1) {
-        $icon = modal.querySelector('.sa-icon.' + 'sa-' + params.type);
-        _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.show($icon);
+      return config;
+    };
+
+    Tooltip.prototype._getDelegateConfig = function _getDelegateConfig() {
+      var config = {};
+
+      if (this.config) {
+        for (var key in this.config) {
+          if (this.constructor.Default[key] !== this.config[key]) {
+            config[key] = this.config[key];
+          }
+        }
       }
 
-      var $input = _getModal$getInput$setFocusStyle.getInput();
+      return config;
+    };
 
-      // Animate icon
-      switch (params.type) {
+    // static
 
-        case 'success':
-          _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.addClass($icon, 'animate');
-          _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.addClass($icon.querySelector('.sa-tip'), 'animateSuccessTip');
-          _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.addClass($icon.querySelector('.sa-long'), 'animateSuccessLong');
-          break;
+    Tooltip._jQueryInterface = function _jQueryInterface(config) {
+      return this.each(function () {
+        var data = $(this).data(DATA_KEY);
+        var _config = (typeof config === 'undefined' ? 'undefined' : _typeof(config)) === 'object' && config;
 
-        case 'error':
-          _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.addClass($icon, 'animateErrorIcon');
-          _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.addClass($icon.querySelector('.sa-x-mark'), 'animateXMark');
-          break;
+        if (!data && /dispose|hide/.test(config)) {
+          return;
+        }
 
-        case 'warning':
-          _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.addClass($icon, 'pulseWarning');
-          _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.addClass($icon.querySelector('.sa-body'), 'pulseWarningIns');
-          _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.addClass($icon.querySelector('.sa-dot'), 'pulseWarningIns');
-          break;
+        if (!data) {
+          data = new Tooltip(this, _config);
+          $(this).data(DATA_KEY, data);
+        }
 
-        case 'input':
-        case 'prompt':
-          $input.setAttribute('type', params.inputType);
-          $input.value = params.inputValue;
-          $input.setAttribute('placeholder', params.inputPlaceholder);
-          _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.addClass(modal, 'show-input');
-          setTimeout(function () {
-            $input.focus();
-            $input.addEventListener('keyup', swal.resetInputError);
-          }, 400);
-          break;
+        if (typeof config === 'string') {
+          if (data[config] === undefined) {
+            throw new Error('No method named "' + config + '"');
+          }
+          data[config]();
+        }
+      });
+    };
+
+    _createClass(Tooltip, null, [{
+      key: 'VERSION',
+      get: function get() {
+        return VERSION;
       }
-    })();
+    }, {
+      key: 'Default',
+      get: function get() {
+        return Default;
+      }
+    }, {
+      key: 'NAME',
+      get: function get() {
+        return NAME;
+      }
+    }, {
+      key: 'DATA_KEY',
+      get: function get() {
+        return DATA_KEY;
+      }
+    }, {
+      key: 'Event',
+      get: function get() {
+        return Event;
+      }
+    }, {
+      key: 'EVENT_KEY',
+      get: function get() {
+        return EVENT_KEY;
+      }
+    }, {
+      key: 'DefaultType',
+      get: function get() {
+        return DefaultType;
+      }
+    }]);
 
-    if (typeof _ret === 'object') {
-      return _ret.v;
+    return Tooltip;
+  }();
+
+  /**
+   * ------------------------------------------------------------------------
+   * jQuery
+   * ------------------------------------------------------------------------
+   */
+
+  $.fn[NAME] = Tooltip._jQueryInterface;
+  $.fn[NAME].Constructor = Tooltip;
+  $.fn[NAME].noConflict = function () {
+    $.fn[NAME] = JQUERY_NO_CONFLICT;
+    return Tooltip._jQueryInterface;
+  };
+
+  return Tooltip;
+}(jQuery);
+
+/**
+ * --------------------------------------------------------------------------
+ * Bootstrap (v4.0.0-alpha.6): popover.js
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * --------------------------------------------------------------------------
+ */
+
+var Popover = function ($) {
+
+  /**
+   * ------------------------------------------------------------------------
+   * Constants
+   * ------------------------------------------------------------------------
+   */
+
+  var NAME = 'popover';
+  var VERSION = '4.0.0-alpha.6';
+  var DATA_KEY = 'bs.popover';
+  var EVENT_KEY = '.' + DATA_KEY;
+  var JQUERY_NO_CONFLICT = $.fn[NAME];
+
+  var Default = $.extend({}, Tooltip.Default, {
+    placement: 'right',
+    trigger: 'click',
+    content: '',
+    template: '<div class="popover" role="tooltip">' + '<h3 class="popover-title"></h3>' + '<div class="popover-content"></div></div>'
+  });
+
+  var DefaultType = $.extend({}, Tooltip.DefaultType, {
+    content: '(string|element|function)'
+  });
+
+  var ClassName = {
+    FADE: 'fade',
+    SHOW: 'show'
+  };
+
+  var Selector = {
+    TITLE: '.popover-title',
+    CONTENT: '.popover-content'
+  };
+
+  var Event = {
+    HIDE: 'hide' + EVENT_KEY,
+    HIDDEN: 'hidden' + EVENT_KEY,
+    SHOW: 'show' + EVENT_KEY,
+    SHOWN: 'shown' + EVENT_KEY,
+    INSERTED: 'inserted' + EVENT_KEY,
+    CLICK: 'click' + EVENT_KEY,
+    FOCUSIN: 'focusin' + EVENT_KEY,
+    FOCUSOUT: 'focusout' + EVENT_KEY,
+    MOUSEENTER: 'mouseenter' + EVENT_KEY,
+    MOUSELEAVE: 'mouseleave' + EVENT_KEY
+  };
+
+  /**
+   * ------------------------------------------------------------------------
+   * Class Definition
+   * ------------------------------------------------------------------------
+   */
+
+  var Popover = function (_Tooltip) {
+    _inherits(Popover, _Tooltip);
+
+    function Popover() {
+      _classCallCheck(this, Popover);
+
+      return _possibleConstructorReturn(this, _Tooltip.apply(this, arguments));
     }
-  }
 
-  /*
-   * Custom image
-   */
-  if (params.imageUrl) {
-    var $customIcon = modal.querySelector('.sa-icon.sa-custom');
+    // overrides
 
-    $customIcon.style.backgroundImage = 'url(' + params.imageUrl + ')';
-    _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.show($customIcon);
+    Popover.prototype.isWithContent = function isWithContent() {
+      return this.getTitle() || this._getContent();
+    };
 
-    var _imgWidth = 80;
-    var _imgHeight = 80;
+    Popover.prototype.getTipElement = function getTipElement() {
+      return this.tip = this.tip || $(this.config.template)[0];
+    };
 
-    if (params.imageSize) {
-      var dimensions = params.imageSize.toString().split('x');
-      var imgWidth = dimensions[0];
-      var imgHeight = dimensions[1];
+    Popover.prototype.setContent = function setContent() {
+      var $tip = $(this.getTipElement());
 
-      if (!imgWidth || !imgHeight) {
-        logStr('Parameter imageSize expects value with format WIDTHxHEIGHT, got ' + params.imageSize);
-      } else {
-        _imgWidth = imgWidth;
-        _imgHeight = imgHeight;
+      // we use append for html objects to maintain js events
+      this.setElementContent($tip.find(Selector.TITLE), this.getTitle());
+      this.setElementContent($tip.find(Selector.CONTENT), this._getContent());
+
+      $tip.removeClass(ClassName.FADE + ' ' + ClassName.SHOW);
+
+      this.cleanupTether();
+    };
+
+    // private
+
+    Popover.prototype._getContent = function _getContent() {
+      return this.element.getAttribute('data-content') || (typeof this.config.content === 'function' ? this.config.content.call(this.element) : this.config.content);
+    };
+
+    // static
+
+    Popover._jQueryInterface = function _jQueryInterface(config) {
+      return this.each(function () {
+        var data = $(this).data(DATA_KEY);
+        var _config = (typeof config === 'undefined' ? 'undefined' : _typeof(config)) === 'object' ? config : null;
+
+        if (!data && /destroy|hide/.test(config)) {
+          return;
+        }
+
+        if (!data) {
+          data = new Popover(this, _config);
+          $(this).data(DATA_KEY, data);
+        }
+
+        if (typeof config === 'string') {
+          if (data[config] === undefined) {
+            throw new Error('No method named "' + config + '"');
+          }
+          data[config]();
+        }
+      });
+    };
+
+    _createClass(Popover, null, [{
+      key: 'VERSION',
+
+
+      // getters
+
+      get: function get() {
+        return VERSION;
       }
-    }
+    }, {
+      key: 'Default',
+      get: function get() {
+        return Default;
+      }
+    }, {
+      key: 'NAME',
+      get: function get() {
+        return NAME;
+      }
+    }, {
+      key: 'DATA_KEY',
+      get: function get() {
+        return DATA_KEY;
+      }
+    }, {
+      key: 'Event',
+      get: function get() {
+        return Event;
+      }
+    }, {
+      key: 'EVENT_KEY',
+      get: function get() {
+        return EVENT_KEY;
+      }
+    }, {
+      key: 'DefaultType',
+      get: function get() {
+        return DefaultType;
+      }
+    }]);
 
-    $customIcon.setAttribute('style', $customIcon.getAttribute('style') + 'width:' + _imgWidth + 'px; height:' + _imgHeight + 'px');
-  }
+    return Popover;
+  }(Tooltip);
 
-  /*
-   * Show cancel button?
+  /**
+   * ------------------------------------------------------------------------
+   * jQuery
+   * ------------------------------------------------------------------------
    */
-  modal.setAttribute('data-has-cancel-button', params.showCancelButton);
-  if (params.showCancelButton) {
-    $cancelBtn.style.display = 'inline-block';
-  } else {
-    _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.hide($cancelBtn);
-  }
 
-  /*
-   * Show confirm button?
-   */
-  modal.setAttribute('data-has-confirm-button', params.showConfirmButton);
-  if (params.showConfirmButton) {
-    $confirmBtn.style.display = 'inline-block';
-  } else {
-    _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.hide($confirmBtn);
-  }
+  $.fn[NAME] = Popover._jQueryInterface;
+  $.fn[NAME].Constructor = Popover;
+  $.fn[NAME].noConflict = function () {
+    $.fn[NAME] = JQUERY_NO_CONFLICT;
+    return Popover._jQueryInterface;
+  };
 
-  /*
-   * Custom text on cancel/confirm buttons
-   */
-  if (params.cancelButtonText) {
-    $cancelBtn.innerHTML = _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.escapeHtml(params.cancelButtonText);
-  }
-  if (params.confirmButtonText) {
-    $confirmBtn.innerHTML = _hasClass$addClass$removeClass$escapeHtml$_show$show$_hide$hide.escapeHtml(params.confirmButtonText);
-  }
+  return Popover;
+}(jQuery);
 
-  /*
-   * Custom color on confirm button
-   */
-  if (params.confirmButtonColor) {
-    // Set confirm button to selected background color
-    $confirmBtn.style.backgroundColor = params.confirmButtonColor;
+}();
 
-    // Set the confirm button color to the loading ring
-    $confirmBtn.style.borderLeftColor = params.confirmLoadingButtonColor;
-    $confirmBtn.style.borderRightColor = params.confirmLoadingButtonColor;
-
-    // Set box-shadow to default focused button
-    _getModal$getInput$setFocusStyle.setFocusStyle($confirmBtn, params.confirmButtonColor);
-  }
-
-  /*
-   * Allow outside click
-   */
-  modal.setAttribute('data-allow-outside-click', params.allowOutsideClick);
-
-  /*
-   * Callback function
-   */
-  var hasDoneFunction = params.doneFunction ? true : false;
-  modal.setAttribute('data-has-done-function', hasDoneFunction);
-
-  /*
-   * Animation
-   */
-  if (!params.animation) {
-    modal.setAttribute('data-animation', 'none');
-  } else if (typeof params.animation === 'string') {
-    modal.setAttribute('data-animation', params.animation); // Custom animation
-  } else {
-    modal.setAttribute('data-animation', 'pop');
-  }
-
-  /*
-   * Timer
-   */
-  modal.setAttribute('data-timer', params.timer);
-};
-
-exports['default'] = setParameters;
-module.exports = exports['default'];
 
 /***/ })
 /******/ ]);
